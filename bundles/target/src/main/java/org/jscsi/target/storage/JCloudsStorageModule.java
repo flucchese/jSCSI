@@ -393,7 +393,7 @@ public class JCloudsStorageModule implements IStorageModule {
                     // + (System.currentTimeMillis() - time) + "\n");
                     // download.flush();
                 } else {
-                    try (InputStream is = blob.getPayload().getInput()) {
+                    try (InputStream is = blob.getPayload().openStream()) {
                        data = ByteStreams.toByteArray(is);
                     }
                     // download.write(Integer.toString(mBucketId) + "," +
@@ -402,7 +402,7 @@ public class JCloudsStorageModule implements IStorageModule {
                     // download.flush();
                     while (data.length < SIZE_PER_BUCKET) {
                         blob = mStore.getBlob(mContainerName, Integer.toString(mBucketId));
-                        try (InputStream is = blob.getPayload().getInput()) {
+                        try (InputStream is = blob.getPayload().openStream()) {
                             data = ByteStreams.toByteArray(is);
                         }
                         // // DEBUG CODE

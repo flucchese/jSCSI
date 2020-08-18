@@ -208,9 +208,6 @@ public final class ISID {
 
     }
 
-    /** Bit mask to extract the first int out from a long. */
-    private static final long FIRST_LINE_FLAG_MASK = 0xFFFFFFFF00000000L;
-
     /** Bit flag mask to get the field <code>A</code> in this ISID. */
     private static final int A_FIELD_FLAG_MASK = 0x3F000000;
 

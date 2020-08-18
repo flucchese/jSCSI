@@ -227,11 +227,9 @@ public final class Configuration {
             se = globalConfig.get(textKey);
 
             synchronized (se) {
-                if (se != null) { return se.getValue(); }
+                return se.getValue();
             }
         }
-
-        throw new OperationalTextKeyException("No OperationalTextKey entry found for key: " + textKey.value());
     }
 
     /**
@@ -316,8 +314,6 @@ public final class Configuration {
             sc = sessionConfigs.get(targetName);
 
             synchronized (sc) {
-                if (sc == null) { throw new NoSuchSessionException("A session with the ID '" + targetName + "' does not exist."); }
-
                 synchronized (response) {
                     SettingEntry se;
                     for (Map.Entry<OperationalTextKey , String> e : response.entrySet()) {
