@@ -71,7 +71,7 @@ import org.jscsi.scsi.protocol.sense.exceptions.SynchronousDataTransferErrorExce
 
 public class BufferedWriteTask extends BufferedTask
 {
-   private static Logger _logger = Logger.getLogger(BufferedWriteTask.class);
+   private static Logger _logger = log.getLogger(BufferedWriteTask.class);
 
    public BufferedWriteTask()
    {
@@ -82,9 +82,9 @@ public class BufferedWriteTask extends BufferedTask
    protected void execute(ByteBuffer buffer, int blockSize) throws InterruptedException,
          SenseException
    {
-      if (_logger.isDebugEnabled())
+      if (_log.isDebugEnabled())
       {
-         _logger.debug("executing task: " + this);
+         _log.debug("executing task: " + this);
       }
       long capacity = this.getDeviceCapacity();
 

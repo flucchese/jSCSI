@@ -32,8 +32,8 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * <h1>Raid0Device</h1>
@@ -52,7 +52,7 @@ public class Raid0Device implements Device {
     private long blockCount = -1;
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Raid0Device.class);
+    private static final Logger log = LogManager.getLogger(Raid0Device.class);
 
     /**
      * Size of the parts, that are distributed between the Devices. Must be a
@@ -115,7 +115,7 @@ public class Raid0Device implements Device {
         }
         blockSize = -1;
         blockCount = -1;
-        LOGGER.info("Closed " + getName() + ".");
+        log.info("Closed " + getName() + ".");
     }
 
     /** {@inheritDoc} */
@@ -180,7 +180,7 @@ public class Raid0Device implements Device {
         }
         blockCount = (blockCount * blockSize / extendSize) * extendSize / blockSize;
         blockCount *= devices.length;
-        LOGGER.info("Opened " + getName() + ".");
+        log.info("Opened " + getName() + ".");
     }
 
     /** {@inheritDoc} */
@@ -311,8 +311,8 @@ public class Raid0Device implements Device {
 
             try {
                 device.read(address, data);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Read " + data.length / blockSize + " blocks from address " + address
+                if (log.isDebugEnabled()) {
+                    log.debug("Read " + data.length / blockSize + " blocks from address " + address
                         + " from " + device.getName());
                 }
                 barrier.await();
@@ -347,8 +347,8 @@ public class Raid0Device implements Device {
 
             try {
                 device.write(address, data);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Wrote " + data.length / blockSize + " blocks to address " + address
+                if (log.isDebugEnabled()) {
+                    log.debug("Wrote " + data.length / blockSize + " blocks to address " + address
                         + " to " + device.getName());
                 }
                 barrier.await();

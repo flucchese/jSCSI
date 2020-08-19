@@ -77,7 +77,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 //TODO: Describe class or interface
 public abstract class AbstractTask implements Task
 {
-   private static Logger _logger = Logger.getLogger(AbstractTask.class);
+   private static Logger _logger = log.getLogger(AbstractTask.class);
 
    private TargetTransportPort targetTransportPort;
    private Command command;
@@ -185,7 +185,7 @@ public abstract class AbstractTask implements Task
       }
       catch (SenseException e)
       {
-         _logger.debug("sense exception caught handling command: " + command);
+         _log.debug("sense exception caught handling command: " + command);
          // Write response with a CHECK CONDITION status.
          this.targetTransportPort.writeResponse(this.command.getNexus(),
                this.command.getCommandReferenceNumber(), Status.CHECK_CONDITION,
@@ -193,12 +193,12 @@ public abstract class AbstractTask implements Task
       }
       catch (InterruptedException e)
       {
-         _logger.info("Task " + name + " was aborted.");
+         _log.info("Task " + name + " was aborted.");
          // Task was aborted, don't do anything
       }
       catch (Exception e)
       {
-         _logger.error("Task " + name + " encountered an exception while executing", e);
+         _log.error("Task " + name + " encountered an exception while executing", e);
       }
    }
 
@@ -217,7 +217,7 @@ public abstract class AbstractTask implements Task
    {
       if (Thread.interrupted())
       {
-         _logger.debug("calling writeData on the TransportPort was interrupted during Task execution");
+         _log.debug("calling writeData on the TransportPort was interrupted during Task execution");
          throw new InterruptedException();
       }
 
@@ -270,7 +270,7 @@ public abstract class AbstractTask implements Task
       {
          // If abort is true the task has been aborted and no data shall be written to
          // the target transport port. Abort remains set as true.
-         _logger.debug("task was aborted, no response to be written: " + this);
+         _log.debug("task was aborted, no response to be written: " + this);
          return;
       }
    }

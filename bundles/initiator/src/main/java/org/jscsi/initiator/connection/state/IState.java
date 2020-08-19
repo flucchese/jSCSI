@@ -23,8 +23,8 @@ import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.initiator.connection.Connection;
 import org.jscsi.parser.ProtocolDataUnit;
 import org.jscsi.parser.ProtocolDataUnitFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -84,7 +84,7 @@ abstract class AbstractState implements IState {
     // --------------------------------------------------------------------------
 
     /** The Logger interface. */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractState.class);
+    protected static final Logger log = LogManager.getLogger(AbstractState.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------

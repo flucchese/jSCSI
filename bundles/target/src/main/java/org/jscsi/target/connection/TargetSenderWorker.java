@@ -19,8 +19,8 @@ import org.jscsi.target.settings.Settings;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.settings.TextKeyword;
 import org.jscsi.target.util.Debug;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TargetSenderWorker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TargetSenderWorker.class);
+    private static final Logger log = LogManager.getLogger(TargetSenderWorker.class);
 
     /**
      * The connection which uses this object for sending and receiving PDUs.
@@ -135,7 +135,7 @@ public class TargetSenderWorker {
             throw new InternetSCSIException(e);
         }
 
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("Receiving this PDU:\n" + pdu);
+        if (log.isDebugEnabled()) log.debug("Receiving this PDU:\n" + pdu);
 
         // parse sequence counters
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
@@ -143,22 +143,22 @@ public class TargetSenderWorker {
         // final int commandSequenceNumber = parser.getCommandSequenceNumber();
         // final int expectedStatusSequenceNumber = parser.getExpectedStatusSequenceNumber();
 
-        if (LOGGER.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             // sharrajesh
             // Needed to debug, out of order receiving of StatusSN and ExpStatSN
             if (bhs.getOpCode() == OperationCode.SCSI_COMMAND) {
                 final SCSICommandParser scsiParser = (SCSICommandParser) bhs.getParser();
                 ScsiOperationCode scsiOpCode = ScsiOperationCode.valueOf(scsiParser.getCDB().get(0));
-                LOGGER.debug("scsiOpCode = " + scsiOpCode);
-                LOGGER.debug("CDB bytes: \n" + Debug.byteBufferToString(scsiParser.getCDB()));
+                log.debug("scsiOpCode = " + scsiOpCode);
+                log.debug("CDB bytes: \n" + Debug.byteBufferToString(scsiParser.getCDB()));
             }
-            // LOGGER.debug("parser.expectedStatusSequenceNumber: " + expectedStatusSequenceNumber);
+            // log.debug("parser.expectedStatusSequenceNumber: " + expectedStatusSequenceNumber);
             if (connection == null)
-                LOGGER.debug("connection: null");
+                log.debug("connection: null");
             else if (connection.getStatusSequenceNumber() == null)
-                LOGGER.debug("connection.getStatusSequenceNumber: null");
+                log.debug("connection.getStatusSequenceNumber: null");
             else
-                LOGGER.debug("connection.getStatusSequenceNumber: " + connection.getStatusSequenceNumber().getValue());
+                log.debug("connection.getStatusSequenceNumber: " + connection.getStatusSequenceNumber().getValue());
         }
 
         // if this is the first PDU in the leading connection, then
@@ -214,7 +214,7 @@ public class TargetSenderWorker {
         if (incrementSequenceNumber) // set StatSN only if field is not reserved
         parser.setStatusSequenceNumber(connection.getStatusSequenceNumber().getValue());
 
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("Sending this PDU:\n" + pdu);
+        if (log.isDebugEnabled()) log.debug("Sending this PDU:\n" + pdu);
 
         // send pdu
         pdu.write(socketChannel);

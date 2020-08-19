@@ -81,7 +81,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 //TODO: Describe class or interface
 public class ModeSenseTask extends LUTask
 {
-   private static Logger _logger = Logger.getLogger(ModeSenseTask.class);
+   private static Logger _logger = log.getLogger(ModeSenseTask.class);
 
    public ModeSenseTask()
    {
@@ -127,7 +127,7 @@ public class ModeSenseTask extends LUTask
 
          if (cdb.getOperationCode() == ModeSense6.OPERATION_CODE)
          {
-            _logger.trace("Assembling return data for MODE SENSE (6)");
+            _log.trace("Assembling return data for MODE SENSE (6)");
             out.writeByte(0); // MODE DATA LENGTH placeholder, will be replaced later
             out.writeByte(0x00); // MEDIUM TYPE set to 0x00 according to SBC-2
             out.writeByte(devspec); // DEVICE-SPECIFIC PARAMETER
@@ -135,7 +135,7 @@ public class ModeSenseTask extends LUTask
          }
          else if (cdb.getOperationCode() == ModeSense10.OPERATION_CODE)
          {
-            _logger.trace("Assembling return data for MODE SENSE (10)");
+            _log.trace("Assembling return data for MODE SENSE (10)");
             out.writeShort(0); // MODE DATA LENGTH placeholder, will be replaced later
             out.writeByte(0x00); // MEDIUM TYPE set to 0x00 according to SBC-2
             out.writeByte(devspec); // DEVICE-SPECIFIC PARAMETER
@@ -168,14 +168,14 @@ public class ModeSenseTask extends LUTask
 
          if (cdb.getPageCode() == 0x3F)
          {
-            _logger.trace("Initiator requested all mode pages");
+            _log.trace("Initiator requested all mode pages");
             for (ModePage page : getModePageRegistry().get(cdb.getSubPageCode() == 0xFF))
             {
-               _logger.trace(String.format(
+               _log.trace(String.format(
                      "Encoding mode page: PAGE_CODE=%X, SUB_PAGE_CODE=%X (at buffer position %d)",
                      page.getPageCode(), page.getSubPageCode(), out.size()));
                out.write(page.encode());
-               _logger.trace("Encoded mode page up to buffer position: " + out.size());
+               _log.trace("Encoded mode page up to buffer position: " + out.size());
             }
          }
          else if (!getModePageRegistry().contains((byte) cdb.getPageCode()))
@@ -186,27 +186,27 @@ public class ModeSenseTask extends LUTask
          {
             if (cdb.getSubPageCode() == 0xFF)
             {
-               _logger.trace("Initiator requested all pages with PAGE_CODE=" + cdb.getPageCode());
+               _log.trace("Initiator requested all pages with PAGE_CODE=" + cdb.getPageCode());
                for (ModePage page : getModePageRegistry().get((byte) cdb.getPageCode()))
                {
-                  _logger.trace("Encoding mode page: PAGE_CODE=" + page.getPageCode()
+                  _log.trace("Encoding mode page: PAGE_CODE=" + page.getPageCode()
                         + ", SUB_PAGE_CODE=" + page.getSubPageCode() + " to buffer position: "
                         + out.size());
                   out.write(page.encode());
-                  _logger.trace("Encoded mode page up to buffer position: " + out.size());
+                  _log.trace("Encoded mode page up to buffer position: " + out.size());
                }
             }
             else
             {
                if (!getModePageRegistry().contains((byte) cdb.getPageCode(), cdb.getSubPageCode()))
                {
-                  _logger.trace("Requested mode page does not exist: " + cdb.getPageCode()
+                  _log.trace("Requested mode page does not exist: " + cdb.getPageCode()
                         + ", SUB_PAGE_CODE=" + cdb.getSubPageCode());
                   throw new InvalidFieldInCDBException(true, 3);
                }
                else
                {
-                  _logger.trace("Initiator requested mode page: " + cdb.getPageCode()
+                  _log.trace("Initiator requested mode page: " + cdb.getPageCode()
                         + ", SUB_PAGE_CODE=" + cdb.getSubPageCode());
                   out.write(getModePageRegistry().get((byte) cdb.getPageCode(),
                         cdb.getSubPageCode()).encode());

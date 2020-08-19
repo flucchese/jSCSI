@@ -16,8 +16,8 @@ import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.settings.TextKeyword;
 import org.jscsi.target.settings.TextParameter;
 import org.jscsi.target.util.ReadWrite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class TextNegotiationStage extends TargetFullFeatureStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TextNegotiationStage.class);
+    private static final Logger log = LogManager.getLogger(TextNegotiationStage.class);
 
     public TextNegotiationStage (TargetFullFeaturePhase targetFullFeaturePhase) {
         super(targetFullFeaturePhase);
@@ -45,7 +45,7 @@ public final class TextNegotiationStage extends TargetFullFeatureStage {
 
         final String textRequest = new String(pdu.getDataSegment().array());
 
-        LOGGER.debug("text request: " + textRequest);
+        log.debug("text request: " + textRequest);
 
         ByteBuffer replyDataSegment = null;// for later
 
@@ -115,7 +115,7 @@ public final class TextNegotiationStage extends TargetFullFeatureStage {
             // concatenate and serialize reply
             final String replyString = TextParameter.concatenateKeyValuePairs(responseKeyValuePairs);
 
-            LOGGER.debug("text negotiation stage reply: " + replyString);
+            log.debug("text negotiation stage reply: " + replyString);
 
             replyDataSegment = ReadWrite.stringToTextDataSegments(replyString, settings.getMaxRecvDataSegmentLength())[0];// definitely
                                                                                                                           // fits

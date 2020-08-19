@@ -28,8 +28,8 @@ package org.jscsi.initiator.devices;
 
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * <h1>DummyDevice</h1>
@@ -50,7 +50,7 @@ public class DummyDevice implements Device {
     private boolean opened = false;
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DummyDevice.class);
+    private static final Logger log = LogManager.getLogger(DummyDevice.class);
 
     /**
      * Constructor to create an DummyDevice. The Device has to be initialized
@@ -72,7 +72,7 @@ public class DummyDevice implements Device {
     /** {@inheritDoc} */
     public void close() throws Exception {
 
-        LOGGER.info("Closed " + getName() + ".");
+        log.info("Closed " + getName() + ".");
         opened = false;
     }
 
@@ -116,7 +116,7 @@ public class DummyDevice implements Device {
         opened = true;
         creationDate = new Date();
 
-        LOGGER.info("Initialized " + getName() + ".");
+        log.info("Initialized " + getName() + ".");
     }
 
     /** {@inheritDoc} */

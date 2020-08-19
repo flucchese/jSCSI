@@ -90,7 +90,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
  */
 public class DefaultTaskSet implements TaskSet
 {
-   private static Logger _logger = Logger.getLogger(DefaultTaskSet.class);
+   private static Logger _logger = log.getLogger(DefaultTaskSet.class);
 
    /*
     * The "tasks" map contains a map of task tags to currently live tasks. The map contains all
@@ -158,19 +158,19 @@ public class DefaultTaskSet implements TaskSet
 
       public void run()
       {
-         if (_logger.isDebugEnabled())
-            _logger.debug("Command now being run: " + this.task.getCommand());
+         if (_log.isDebugEnabled())
+            _log.debug("Command now being run: " + this.task.getCommand());
 
          this.task.run();
 
-         if (_logger.isTraceEnabled())
-            _logger.trace("Task finished: " + this.task);
+         if (_log.isTraceEnabled())
+            _log.trace("Task finished: " + this.task);
 
          long taskTag = this.task.getCommand().getNexus().getTaskTag();
          finished(taskTag > -1 ? taskTag : null); // untagged tasks have a Q value of -1 (invalid)
 
-         if (_logger.isTraceEnabled())
-            _logger.trace("Marked task as finished in task set: " + this.task);
+         if (_log.isTraceEnabled())
+            _log.trace("Marked task as finished in task set: " + this.task);
       }
 
       public boolean abort()
@@ -233,10 +233,10 @@ public class DefaultTaskSet implements TaskSet
 
       lock.lockInterruptibly();
 
-      if (_logger.isTraceEnabled())
+      if (_log.isTraceEnabled())
       {
-         _logger.trace("Task set BEFORE offer(): " + this.dormant);
-         _logger.trace("offering to taskset command: " + task.getCommand());
+         _log.trace("Task set BEFORE offer(): " + this.dormant);
+         _log.trace("offering to taskset command: " + task.getCommand());
       }
 
       try
@@ -256,7 +256,7 @@ public class DefaultTaskSet implements TaskSet
                Command command = task.getCommand();
                task.getTargetTransportPort().writeResponse(command.getNexus(),
                      command.getCommandReferenceNumber(), Status.TASK_SET_FULL, null);
-               _logger.debug("task set is full, rejecting task: " + task);
+               _log.debug("task set is full, rejecting task: " + task);
                return false;
             }
          }
@@ -278,8 +278,8 @@ public class DefaultTaskSet implements TaskSet
             task.getTargetTransportPort().writeResponse(command.getNexus(),
                   command.getCommandReferenceNumber(), Status.CHECK_CONDITION,
                   ByteBuffer.wrap((new OverlappedCommandsAttemptedException(true)).encode()));
-            if (_logger.isDebugEnabled())
-               _logger.debug("command not accepted due to preexisting untagged task: " + task);
+            if (_log.isDebugEnabled())
+               _log.debug("command not accepted due to preexisting untagged task: " + task);
             return false;
          }
 
@@ -298,15 +298,15 @@ public class DefaultTaskSet implements TaskSet
             this.dormant.add(container);
          }
 
-         if (_logger.isTraceEnabled())
-            _logger.trace("Task set: " + this.dormant);
+         if (_log.isTraceEnabled())
+            _log.trace("Task set: " + this.dormant);
 
          this.capacity--;
          this.notEmpty.signalAll();
          this.unblocked.signalAll();
 
-         if (_logger.isTraceEnabled())
-            _logger.trace("offered successfully command: " + task.getCommand());
+         if (_log.isTraceEnabled())
+            _log.trace("offered successfully command: " + task.getCommand());
          return true;
 
       }
@@ -357,7 +357,7 @@ public class DefaultTaskSet implements TaskSet
          timeout = unit.toNanos(timeout);
          while (this.dormant.size() == 0)
          {
-            _logger.trace("Task set empty; waiting for new task to be added");
+            _log.trace("Task set empty; waiting for new task to be added");
             if (timeout > 0)
             {
                // "notEmpty" is notified whenever a task is added to the set
@@ -372,7 +372,7 @@ public class DefaultTaskSet implements TaskSet
          // wait until the next task is not blocked
          while (this.blocked(this.dormant.get(0)))
          {
-            _logger.trace("Next task blocked; waiting for other tasks to finish");
+            _log.trace("Next task blocked; waiting for other tasks to finish");
             if (timeout > 0)
             {
                // "unblocked" is notified whenever a task is finished or a new task is
@@ -389,10 +389,10 @@ public class DefaultTaskSet implements TaskSet
          TaskContainer container = this.dormant.remove(0);
          this.enabled.add(container);
 
-         if (_logger.isDebugEnabled())
+         if (_log.isDebugEnabled())
          {
-            _logger.debug("Enabling command: " + container.getCommand());
-            _logger.debug("Dormant task set: " + this.dormant);
+            _log.debug("Enabling command: " + container.getCommand());
+            _log.debug("Dormant task set: " + this.dormant);
          }
 
          return container;
@@ -595,11 +595,11 @@ public class DefaultTaskSet implements TaskSet
       Task task = null;
       while (task == null)
       {
-         if (_logger.isTraceEnabled())
-            _logger.trace("Polling for next task; timeout in 30 seconds");
+         if (_log.isTraceEnabled())
+            _log.trace("Polling for next task; timeout in 30 seconds");
          task = this.poll(30, TimeUnit.SECONDS);
-         if (_logger.isTraceEnabled())
-            _logger.trace("returning command for execution: "
+         if (_log.isTraceEnabled())
+            _log.trace("returning command for execution: "
                   + (task == null ? "null" : task.getCommand()));
       }
       return task;

@@ -48,7 +48,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 
 public class ReportLunsTask extends TargetTask
 {
-   private static Logger _logger = Logger.getLogger(ReportLunsTask.class);
+   private static Logger _logger = log.getLogger(ReportLunsTask.class);
 
    public ReportLunsTask()
    {
@@ -68,7 +68,7 @@ public class ReportLunsTask extends TargetTask
    @Override
    protected void execute() throws InterruptedException, SenseException
    {
-      _logger.debug("executing ReportLuns task");
+      _log.debug("executing ReportLuns task");
 
       ReportLuns cdb = (ReportLuns) getCommand().getCommandDescriptorBlock();
       ByteBuffer data = ByteBuffer.allocate((int) cdb.getAllocationLength());
@@ -81,11 +81,11 @@ public class ReportLunsTask extends TargetTask
             // Report only well known logical units. Because this implementation does not
             // support well known logical units, zero LUs are returned.
             data.putLong(0); // 4-byte LUN LIST LENGTH = 0, 4-byte reserved field
-            _logger.warn("unsupported request to report well known logical units");
+            _log.warn("unsupported request to report well known logical units");
          }
          else
          {
-            _logger.debug("request to report logical units");
+            _log.debug("request to report logical units");
             // SELECT REPORT 0x00 or 0x02
             data.putInt(this.getLogicalUnits().size() * 8); // LUN LIST LENGTH (each entry is 8 bytes)
             data.putInt(0); // 4-byte reserved field
@@ -98,7 +98,7 @@ public class ReportLunsTask extends TargetTask
       }
       catch (BufferOverflowException e)
       {
-         _logger.warn("BufferOverflowException when writing out to transportport");
+         _log.warn("BufferOverflowException when writing out to transportport");
          /*
           * The client's allocation length was not enough for return information. SBC-2 specifies
           * that no indication of this event shall be returned to the client.
@@ -110,11 +110,11 @@ public class ReportLunsTask extends TargetTask
           */
       }
 
-      _logger.debug("calling writeData from ReportLunsTask");
+      _log.debug("calling writeData from ReportLunsTask");
       this.writeData(data);
       this.writeResponse(Status.GOOD, null);
 
-      _logger.debug("completed ReportLuns task");
+      _log.debug("completed ReportLuns task");
 
       // TODO Auto-generated method stub
 

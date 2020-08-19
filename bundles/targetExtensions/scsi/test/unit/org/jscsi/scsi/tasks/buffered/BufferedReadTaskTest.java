@@ -75,7 +75,7 @@ import org.junit.Test;
 
 public class BufferedReadTaskTest extends BufferTestTask
 {
-   private static Logger _logger = Logger.getLogger(BufferedReadTaskTest.class);
+   private static Logger _logger = log.getLogger(BufferedReadTaskTest.class);
 
    private static final int READ_BLOCKS = 10;
 
@@ -88,7 +88,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead6inMemory()
    {
-      _logger.debug("********** READ6 MEMORY **********");
+      _log.debug("********** READ6 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read6(false, true, lba, READ_BLOCKS);
       ByteBuffer data =
@@ -102,7 +102,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead6inFile()
    {
-      _logger.debug("********** READ6 FILE **********");
+      _log.debug("********** READ6 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read6(false, true, lba, READ_BLOCKS);
       ByteBuffer data =
@@ -116,7 +116,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead10inMemory()
    {
-      _logger.debug("********** READ10 MEMORY **********");
+      _log.debug("********** READ10 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read10(0, false, false, false, false, false, lba, READ_BLOCKS);
       ByteBuffer data =
@@ -130,7 +130,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead10inFile()
    {
-      _logger.debug("********** READ10 FILE **********");
+      _log.debug("********** READ10 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read10(0, false, false, false, false, false, lba, READ_BLOCKS);
       ByteBuffer data =
@@ -144,7 +144,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead12inMemory()
    {
-      _logger.debug("********** READ12 MEMORY **********");
+      _log.debug("********** READ12 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read12(0, false, false, false, false, false, lba, READ_BLOCKS);
       ByteBuffer data =
@@ -158,7 +158,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead12inFile()
    {
-      _logger.debug("********** READ12 FILE **********");
+      _log.debug("********** READ12 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read12(0, false, false, false, false, false, lba, READ_BLOCKS);
       ByteBuffer data =
@@ -172,7 +172,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead16inMemory()
    {
-      _logger.debug("********** READ16 MEMORY **********");
+      _log.debug("********** READ16 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read16(0, false, false, false, false, false, lba, READ_BLOCKS);
       ByteBuffer data =
@@ -186,7 +186,7 @@ public class BufferedReadTaskTest extends BufferTestTask
    @Test
    public void testRead16inFile()
    {
-      _logger.debug("********** READ16 FILE **********");
+      _log.debug("********** READ16 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Read16(0, false, false, false, false, false, lba, READ_BLOCKS);
       ByteBuffer data =

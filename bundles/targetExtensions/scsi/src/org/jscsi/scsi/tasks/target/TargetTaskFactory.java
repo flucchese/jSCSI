@@ -49,7 +49,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 
 public class TargetTaskFactory implements TaskFactory
 {
-   private static Logger _logger = Logger.getLogger(TargetTaskFactory.class);
+   private static Logger _logger = log.getLogger(TargetTaskFactory.class);
 
    private static Map<Class<? extends CDB>, Class<? extends TargetTask>> tasks =
          new HashMap<Class<? extends CDB>, Class<? extends TargetTask>>();
@@ -74,7 +74,7 @@ public class TargetTaskFactory implements TaskFactory
          case ReportLuns.OPERATION_CODE :
             return new ReportLunsTask(logicalUnits, port, command, null, null);
          default :
-            _logger.error("Initiator attempted to execute unsupported command: ("
+            _log.error("Initiator attempted to execute unsupported command: ("
                   + command.getCommandDescriptorBlock().getOperationCode() + ") "
                   + command.getCommandDescriptorBlock().getClass().getName());
             throw new InvalidCommandOperationCodeException();

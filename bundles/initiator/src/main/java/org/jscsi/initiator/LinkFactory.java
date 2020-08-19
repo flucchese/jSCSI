@@ -25,8 +25,8 @@ import java.util.concurrent.Executors;
 import org.jscsi.exception.NoSuchSessionException;
 import org.jscsi.initiator.connection.Connection;
 import org.jscsi.initiator.connection.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -44,7 +44,7 @@ public final class LinkFactory {
     // --------------------------------------------------------------------------
 
     /** The logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(LinkFactory.class);
+    private static final Logger log = LogManager.getLogger(LinkFactory.class);
 
     /** The calling Initiator. */
     private final Initiator initiator;
@@ -78,7 +78,7 @@ public final class LinkFactory {
             final Session newSession = new Session(this, initConfiguration, initTargetName, inetAddress, Executors.newSingleThreadExecutor());
             return newSession;
         } catch (Exception e) {
-            LOGGER.error("This exception is thrown: " + e);
+            log.error("This exception is thrown: " + e);
             e.printStackTrace();
             return null;
         }
@@ -100,7 +100,7 @@ public final class LinkFactory {
             final Connection newConnection = new Connection(session, initConfiguration, inetAddress, initConnectionID);
             return newConnection;
         } catch (Exception e) {
-            LOGGER.error("This exception is thrown: " + e);
+            log.error("This exception is thrown: " + e);
             e.printStackTrace();
             return null;
         }

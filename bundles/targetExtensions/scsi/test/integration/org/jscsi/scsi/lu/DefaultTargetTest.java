@@ -68,12 +68,12 @@ import org.junit.Test;
 
 public class DefaultTargetTest
 {
-   private static Logger _logger = Logger.getLogger(DefaultTargetTest.class);
+   private static Logger _logger = log.getLogger(DefaultTargetTest.class);
 
    @BeforeClass
    public static void setUpBeforeClass() throws Exception
    {
-      _logger.debug("initializing test");
+      _log.debug("initializing test");
    }
 
    @AfterClass

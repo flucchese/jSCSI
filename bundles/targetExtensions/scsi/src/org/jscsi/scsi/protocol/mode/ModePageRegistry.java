@@ -76,7 +76,7 @@ import org.jscsi.scsi.protocol.util.ByteBufferInputStream;
 
 public abstract class ModePageRegistry implements Serializer
 {
-   private static Logger _logger = Logger.getLogger(ModePageRegistry.class);
+   private static Logger _logger = log.getLogger(ModePageRegistry.class);
 
    // Long to ModePage map
    private SortedMap<Byte, SortedMap<Integer, ModePage>> pages = null;
@@ -192,7 +192,7 @@ public abstract class ModePageRegistry implements Serializer
    @SuppressWarnings("unchecked")
    public ModePage decode(ByteBuffer buffer) throws IOException
    {
-      _logger.trace("Decoding mode page at buffer position: " + buffer.position());
+      _log.trace("Decoding mode page at buffer position: " + buffer.position());
 
       DataInputStream dataIn = new DataInputStream(new ByteBufferInputStream(buffer));
 
@@ -227,9 +227,9 @@ public abstract class ModePageRegistry implements Serializer
 
       if (page != null)
       {
-         _logger.trace("Decoding mode page: " + page);
+         _log.trace("Decoding mode page: " + page);
          page.decode(header, buffer);
-         _logger.trace("Mode page decoded up to buffer position: " + buffer.position());
+         _log.trace("Mode page decoded up to buffer position: " + buffer.position());
          return page;
       }
       else

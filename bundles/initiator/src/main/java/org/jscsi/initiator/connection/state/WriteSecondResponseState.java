@@ -78,20 +78,20 @@ public final class WriteSecondResponseState extends AbstractState {
     public final void execute () throws InternetSCSIException {
 
         final ProtocolDataUnit protocolDataUnit = connection.receive();
-        LOGGER.trace("1" + protocolDataUnit);
+        log.trace("1" + protocolDataUnit);
         if (protocolDataUnit.getBasicHeaderSegment().getParser() instanceof Ready2TransferParser) {
-            LOGGER.trace("2");
+            log.trace("2");
             final Ready2TransferParser parser = (Ready2TransferParser) protocolDataUnit.getBasicHeaderSegment().getParser();
 
             final int targetTransferTag = parser.getTargetTransferTag();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("R2T has TTT set to " + targetTransferTag);
+            if (log.isDebugEnabled()) {
+                log.debug("R2T has TTT set to " + targetTransferTag);
             }
 
             final int desiredDataTransferLength = parser.getDesiredDataTransferLength();
             if (desiredDataTransferLength > connection.getSettingAsInt(OperationalTextKey.MAX_BURST_LENGTH)) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error("MaxBurstLength limit is exceed.");
+                if (log.isErrorEnabled()) {
+                    log.error("MaxBurstLength limit is exceed.");
                 }
                 throw new InternetSCSIException("MaxBurstLength limit is exceed.");
             }

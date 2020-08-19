@@ -95,8 +95,8 @@ public final class ReadResponseState extends AbstractState {
             if (protocolDataUnit.getBasicHeaderSegment().getParser() instanceof DataInParser) {
                 final DataInParser parser = (DataInParser) protocolDataUnit.getBasicHeaderSegment().getParser();
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Remaining, DataSegmentLength: " + buffer.remaining() + ", " + protocolDataUnit.getBasicHeaderSegment().getDataSegmentLength());
+                if (log.isDebugEnabled()) {
+                    log.debug("Remaining, DataSegmentLength: " + buffer.remaining() + ", " + protocolDataUnit.getBasicHeaderSegment().getDataSegmentLength());
                 }
 
                 final ByteBuffer dataSegment = protocolDataUnit.getDataSegment();

@@ -72,7 +72,7 @@ import org.junit.Test;
 
 public class BufferedRequestSenseTaskTest extends BufferTestTask
 {
-   private static Logger _logger = Logger.getLogger(BufferedReadCapacityTaskTest.class);
+   private static Logger _logger = log.getLogger(BufferedReadCapacityTaskTest.class);
 
    private static int cmdRef = 0;
 
@@ -83,7 +83,7 @@ public class BufferedRequestSenseTaskTest extends BufferTestTask
    @Test
    public void testRequestSenseinMemory()
    {
-      _logger.debug("********** REQUEST SENSE TEST - MEMORY **********");
+      _log.debug("********** REQUEST SENSE TEST - MEMORY **********");
       CDB cdb = new RequestSense(false, ALLOCATION_LENGTH);
       this.submitMemoryTask(cdb, cmdRef);
       verifyInputBuffer();
@@ -93,7 +93,7 @@ public class BufferedRequestSenseTaskTest extends BufferTestTask
    @Test
    public void testRequestSenseinFile()
    {
-      _logger.debug("********** REQUEST SENSE TEST - FILE **********");
+      _log.debug("********** REQUEST SENSE TEST - FILE **********");
       CDB cdb = new RequestSense(false, ALLOCATION_LENGTH);
       this.submitFileTask(cdb, cmdRef);
       verifyInputBuffer();

@@ -39,8 +39,8 @@ import org.jscsi.parser.snack.SNACKRequestParser;
 import org.jscsi.parser.text.TextRequestParser;
 import org.jscsi.parser.tmf.TaskManagementFunctionRequestParser;
 import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * This aspect is used to monitor the pdu's while
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public aspect SenderWorkerMonitor {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger("SenderWorkerMonitor");
+	private static final Logger log = LogManager.getLogger("SenderWorkerMonitor");
 	
 	/**
 	 * Point cutting the recieve method on the senderworker.
@@ -68,11 +68,11 @@ public aspect SenderWorkerMonitor {
 		call(* SenderWorker.sendOverWire(ProtocolDataUnit)) && target(s) && args(p);
 	
 	before(SenderWorker s) : recieve(s){
-		LOGGER.info("Preparing to recieve from wire.");
+		log.info("Preparing to recieve from wire.");
 	}
 	
 	before(SenderWorker s, ProtocolDataUnit p) : send(s, p){
-		LOGGER.info("Sending over wire PDU: " + p);
+		log.info("Sending over wire PDU: " + p);
 
 		/**
 		 * Assertions on read in PDUs This can only happen when a request went

@@ -119,8 +119,8 @@ public final class FullFeaturePhase extends AbstractPhase {
         // first stage
         short blocks = (short) Math.min(READ_FIRST_STAGE_BLOCKS, totalBlocks);
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Now reading sequences of length " + blocks + " blocks.");
+        if (log.isInfoEnabled()) {
+            log.info("Now reading sequences of length " + blocks + " blocks.");
         }
 
         connection.nextState(new ReadRequestState(connection, dst, TaskAttributes.SIMPLE, (int) Math.min(bytes2Process, blocks * blockSize), startAddress, blocks));
@@ -133,8 +133,8 @@ public final class FullFeaturePhase extends AbstractPhase {
 
         if (blocks > 0) {
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Now reading sequences of length " + blocks + " blocks.");
+            if (log.isInfoEnabled()) {
+                log.info("Now reading sequences of length " + blocks + " blocks.");
             }
             connection.nextState(new ReadRequestState(connection, dst, TaskAttributes.SIMPLE, (int) Math.min(bytes2Process, blocks * blockSize), startAddress, blocks));
             startAddress += blocks;
@@ -147,8 +147,8 @@ public final class FullFeaturePhase extends AbstractPhase {
 
         while (blocks > 0) {
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Now reading sequences of length " + blocks + " blocks.");
+            if (log.isInfoEnabled()) {
+                log.info("Now reading sequences of length " + blocks + " blocks.");
             }
 
             connection.nextState(new ReadRequestState(connection, dst, TaskAttributes.SIMPLE, (int) Math.min(bytes2Process, blocks * blockSize), startAddress, blocks));
@@ -177,8 +177,8 @@ public final class FullFeaturePhase extends AbstractPhase {
         // first stage
         short blocks = (short) Math.min(WRITE_FIRST_STAGE_BLOCKS, totalBlocks);
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Now sending sequences of length " + blocks + " blocks.");
+        if (log.isInfoEnabled()) {
+            log.info("Now sending sequences of length " + blocks + " blocks.");
         }
 
         int expectedDataTransferLength = (int) Math.min(bytes2Process, blocks * blockSize);
@@ -193,9 +193,9 @@ public final class FullFeaturePhase extends AbstractPhase {
 
         if (blocks > 0) {
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Now sending sequences of length " + blocks + " blocks.");
-                LOGGER.info("Remaining, DataSegmentLength: " + bytes2Process + ", " + expectedDataTransferLength);
+            if (log.isInfoEnabled()) {
+                log.info("Now sending sequences of length " + blocks + " blocks.");
+                log.info("Remaining, DataSegmentLength: " + bytes2Process + ", " + expectedDataTransferLength);
             }
 
             expectedDataTransferLength = (int) Math.min(bytes2Process, blocks * blockSize);
@@ -211,8 +211,8 @@ public final class FullFeaturePhase extends AbstractPhase {
 
         while (blocks > 0) {
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Now sending sequences of length " + blocks + " blocks.");
+            if (log.isInfoEnabled()) {
+                log.info("Now sending sequences of length " + blocks + " blocks.");
             }
 
             expectedDataTransferLength = (int) Math.min(bytes2Process, blocks * blockSize);

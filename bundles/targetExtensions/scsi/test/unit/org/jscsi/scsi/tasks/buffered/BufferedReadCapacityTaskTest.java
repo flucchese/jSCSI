@@ -71,7 +71,7 @@ import org.junit.Test;
 
 public class BufferedReadCapacityTaskTest extends BufferTestTask
 {
-   private static Logger _logger = Logger.getLogger(BufferedReadCapacityTaskTest.class);
+   private static Logger _logger = log.getLogger(BufferedReadCapacityTaskTest.class);
 
    private static int cmdRef = 0;
 
@@ -80,7 +80,7 @@ public class BufferedReadCapacityTaskTest extends BufferTestTask
    @Test
    public void testReadCapacity10inMemory()
    {
-      _logger.debug("********** READ CAPACITY 10 MEMORY **********");
+      _log.debug("********** READ CAPACITY 10 MEMORY **********");
       CDB cdb = new ReadCapacity10(false, 0);
       this.submitMemoryTask(cdb, cmdRef);
       verifyInputBufferCapacity10();
@@ -90,7 +90,7 @@ public class BufferedReadCapacityTaskTest extends BufferTestTask
    @Test
    public void testReadCapacity10inFile()
    {
-      _logger.debug("********** READ CAPACITY 10 FILE **********");
+      _log.debug("********** READ CAPACITY 10 FILE **********");
       CDB cdb = new ReadCapacity10(false, 0);
       this.submitFileTask(cdb, cmdRef);
       verifyInputBufferCapacity10();
@@ -100,7 +100,7 @@ public class BufferedReadCapacityTaskTest extends BufferTestTask
    @Test
    public void testReadCapacity16inMemory()
    {
-      _logger.debug("********** READ CAPACITY 16 MEMORY **********");
+      _log.debug("********** READ CAPACITY 16 MEMORY **********");
       CDB cdb = new ReadCapacity16(32, false, 0);
       this.submitMemoryTask(cdb, cmdRef);
       verifyInputBufferCapacity16();
@@ -110,7 +110,7 @@ public class BufferedReadCapacityTaskTest extends BufferTestTask
    @Test
    public void testReadCapacity16inFile()
    {
-      _logger.debug("********** READ CAPACITY 16 FILE **********");
+      _log.debug("********** READ CAPACITY 16 FILE **********");
       CDB cdb = new ReadCapacity16(32, false, 0);
       this.submitFileTask(cdb, cmdRef);
       verifyInputBufferCapacity16();

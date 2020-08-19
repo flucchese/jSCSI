@@ -94,7 +94,7 @@ import org.junit.Test;
 
 public class DefaultLogicalUnitTest extends AbstractLogicalUnit
 {
-   private static Logger _logger = Logger.getLogger(DefaultLogicalUnitTest.class);
+   private static Logger _logger = log.getLogger(DefaultLogicalUnitTest.class);
 
    private static final int NUM_BLOCKS_TRANSFER = 16;
 
@@ -122,7 +122,7 @@ public class DefaultLogicalUnitTest extends AbstractLogicalUnit
    @BeforeClass
    public static void setUpBeforeClass() throws Exception
    {
-      _logger.debug("initializing test");
+      _log.debug("initializing test");
 
       taskSet = new DefaultTaskSet(TASK_SET_QUEUE_DEPTH);
       taskManager = new DefaultTaskManager(TASK_MGR_NUM_THREADS, taskSet);
@@ -133,17 +133,17 @@ public class DefaultLogicalUnitTest extends AbstractLogicalUnit
       taskFactory = new BufferedTaskFactory(store, STORE_BLOCK_SIZE, modeRegistry, inquiryRegistry);
 
       lu = new DefaultLogicalUnitTest(taskSet, taskManager, taskFactory);
-      _logger.debug("created logical unit: " + lu);
+      _log.debug("created logical unit: " + lu);
 
       lu.start();
-      _logger.debug("logical unit successfully started");
+      _log.debug("logical unit successfully started");
    }
 
    @AfterClass
    public static void tearDownAfterClass() throws Exception
    {
       lu.stop();
-      _logger.debug("exiting test");
+      _log.debug("exiting test");
    }
 
    @Before

@@ -45,8 +45,8 @@ import org.jscsi.parser.datasegment.OperationalTextKey;
 import org.jscsi.parser.datasegment.SettingsMap;
 import org.jscsi.parser.login.LoginStage;
 import org.jscsi.utils.SerialArithmeticNumber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -107,7 +107,7 @@ public final class Session {
     protected short targetSessionIdentifyingHandle;
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Session.class);
+    private static final Logger log = LogManager.getLogger(Session.class);
 
     /** The <code>Configuration</code> instance for this session. */
     protected final Configuration configuration;
@@ -324,7 +324,7 @@ public final class Session {
 
             return nextFreeConnectionID++;
         } else {
-            LOGGER.warn("Unused new connection -> ignored!");
+            log.warn("Unused new connection -> ignored!");
             return nextFreeConnectionID;
         }
 
@@ -401,7 +401,7 @@ public final class Session {
      */
     public final void close () throws IOException {
 
-        LOGGER.info("Closing was requested.");
+        log.info("Closing was requested.");
 
         for (Connection c : connections) {
             c.close();
@@ -518,7 +518,7 @@ public final class Session {
     public final void setPhase (final IPhase newPhase) {
 
         phase = newPhase;
-        LOGGER.trace("Switching to phase " + newPhase.getClass().getSimpleName());
+        log.trace("Switching to phase " + newPhase.getClass().getSimpleName());
 
     }
 
@@ -544,7 +544,7 @@ public final class Session {
             }
             return null;
         }
-        // LOGGER.info("Added a " + task + " to the TaskQueue");
+        // log.info("Added a " + task + " to the TaskQueue");
     }
 
     /**
@@ -560,7 +560,7 @@ public final class Session {
             e.printStackTrace();
         }
         outstandingTasks.remove(ftask);
-        LOGGER.debug("Finished a " + ftask + " for the session " + targetName);
+        log.debug("Finished a " + ftask + " for the session " + targetName);
     }
 
     /**
@@ -581,7 +581,7 @@ public final class Session {
                 taskBalancer.releaseConnection(outstandingTasks.get(task));
                 outstandingTasks.remove(task);
             }
-            LOGGER.debug("Restarted a Task out of the outstandingTasks Queue");
+            log.debug("Restarted a Task out of the outstandingTasks Queue");
         } catch (Exception e) {
             throw new ExecutionException(e);
         }
@@ -596,7 +596,7 @@ public final class Session {
     public final void addOutstandingTask (final Connection connection, final ITask task) {
 
         outstandingTasks.put(task, connection);
-        LOGGER.debug("Added a Task to the outstandingTasks Queue");
+        log.debug("Added a Task to the outstandingTasks Queue");
     }
 
     /**

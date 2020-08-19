@@ -14,8 +14,8 @@ import org.jscsi.target.settings.NegotiationType;
 import org.jscsi.target.settings.SettingsNegotiator;
 import org.jscsi.target.settings.TextKeyword;
 import org.jscsi.target.settings.TextParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Entry {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Entry.class);
+    private static final Logger log = LogManager.getLogger(Entry.class);
 
     /**
      * A {@link KeySet} containing all keys that can be used for negotiating this {@link Entry}'s value.
@@ -95,7 +95,7 @@ public abstract class Entry {
      * @param logMessage
      */
     private void fail (final String logMessage) {
-        LOGGER.error("negotiation error " + keySet + ": " + logMessage);
+        log.error("negotiation error " + keySet + ": " + logMessage);
         negotiationStatus = NegotiationStatus.REJECTED;
     }
 

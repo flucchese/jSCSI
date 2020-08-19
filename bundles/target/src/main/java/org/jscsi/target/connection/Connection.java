@@ -22,8 +22,8 @@ import org.jscsi.target.settings.Settings;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.util.FastByteArrayProvider;
 import org.jscsi.target.util.SerialArithmeticNumber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -65,7 +65,7 @@ public interface Connection extends Callable<Void> {
 
     public static class TargetConnection implements Connection {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(TargetConnection.class);
+        private static final Logger log = LogManager.getLogger(TargetConnection.class);
 
         /**
          * The {@link TargetSession} this connection belongs to.
@@ -213,7 +213,7 @@ public interface Connection extends Callable<Void> {
                 // *** login phase ***
                 phase = new TargetLoginPhase(this);
                 if (phase.execute(lastReceivedPDU)) {
-                    LOGGER.debug("Login Phase successful");
+                    log.debug("Login Phase successful");
 
                     // if this is the leading connection, set the session type
                     final Settings settings = getSettings();
@@ -227,12 +227,12 @@ public interface Connection extends Callable<Void> {
                 senderWorker.close();
             } catch (OperationNotSupportedException | IOException | InterruptedException | InternetSCSIException | DigestException
                     | SettingsException e) {
-                LOGGER.error("Exception throws", e);
+                log.error("Exception throws", e);
             }
 
             targetSession.removeTargetConnection(this);
 
-            LOGGER.debug("closed connection");
+            log.debug("closed connection");
 
             return null;
         }

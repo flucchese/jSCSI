@@ -30,8 +30,8 @@ import java.nio.ByteBuffer;
 
 import org.jscsi.initiator.Configuration;
 import org.jscsi.initiator.Initiator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * <h1>JSCSIDevice</h1>
@@ -52,7 +52,7 @@ public class JSCSIDevice implements Device {
     private long blockCount = -1;
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(JSCSIDevice.class);
+    private static final Logger log = LogManager.getLogger(JSCSIDevice.class);
 
     /**
      * Constructor to create an JSCSIDevice. The Device has to be initialized
@@ -79,7 +79,7 @@ public class JSCSIDevice implements Device {
         initiator.closeSession(target);
         blockSize = -1;
         blockCount = -1;
-        LOGGER.info("Closed " + getName() + ".");
+        log.info("Closed " + getName() + ".");
     }
 
     /** {@inheritDoc} */
@@ -119,7 +119,7 @@ public class JSCSIDevice implements Device {
         blockSize = (int)initiator.getBlockSize(target);
         blockCount = initiator.getCapacity(target);
 
-        LOGGER.info("Initialized " + getName() + ".");
+        log.info("Initialized " + getName() + ".");
     }
 
     /** {@inheritDoc} */

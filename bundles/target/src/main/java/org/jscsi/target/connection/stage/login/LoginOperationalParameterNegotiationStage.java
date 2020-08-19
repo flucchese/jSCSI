@@ -14,8 +14,8 @@ import org.jscsi.parser.login.LoginStatus;
 import org.jscsi.target.connection.phase.TargetLoginPhase;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.settings.TextParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class LoginOperationalParameterNegotiationStage extends TargetLoginStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoginOperationalParameterNegotiationStage.class);
+    private static final Logger log = LogManager.getLogger(LoginOperationalParameterNegotiationStage.class);
 
     /**
      * The constructor.
@@ -38,7 +38,7 @@ public final class LoginOperationalParameterNegotiationStage extends TargetLogin
 
     @Override
     public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , IllegalArgumentException , SettingsException {
-        LOGGER.debug("Entering LOPN Stage");
+        log.debug("Entering LOPN Stage");
 
         BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
         initiatorTaskTag = bhs.getInitiatorTaskTag();
@@ -56,7 +56,7 @@ public final class LoginOperationalParameterNegotiationStage extends TargetLogin
         }
 
         // print request and response key value pairs if debugging
-        if (LOGGER.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             final StringBuilder sb = new StringBuilder();
             sb.append("request: ");
             for (String s : requestKeyValuePairs) {
@@ -68,7 +68,7 @@ public final class LoginOperationalParameterNegotiationStage extends TargetLogin
                 sb.append("\n  ");
                 sb.append(s);
             }
-            LOGGER.debug(sb.toString());
+            log.debug(sb.toString());
         }
 
         // make sure that initiator wants to proceed to FFP, leave if it does

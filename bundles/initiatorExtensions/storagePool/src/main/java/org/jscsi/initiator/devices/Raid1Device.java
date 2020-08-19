@@ -32,8 +32,8 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * <h1>Raid1Device</h1>
@@ -52,7 +52,7 @@ public class Raid1Device implements Device {
     private long blockCount = -1;
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Raid1Device.class);
+    private static final Logger log = LogManager.getLogger(Raid1Device.class);
 
     /**
      * Pointer to next device to read data from. Used to distribute reads
@@ -96,7 +96,7 @@ public class Raid1Device implements Device {
         }
         blockSize = -1;
         blockCount = -1;
-        LOGGER.info("Closed " + getName() + ".");
+        log.info("Closed " + getName() + ".");
     }
 
     /** {@inheritDoc} */

@@ -33,8 +33,8 @@ import org.jscsi.parser.ProtocolDataUnit;
 import org.jscsi.parser.datasegment.OperationalTextKey;
 import org.jscsi.parser.datasegment.SettingsMap;
 import org.jscsi.utils.SerialArithmeticNumber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -53,7 +53,7 @@ public final class Connection {
     // --------------------------------------------------------------------------
 
     /** The logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
+    private static final Logger log = LogManager.getLogger(Connection.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
@@ -196,7 +196,7 @@ public final class Connection {
 
         expectedStatusSequenceNumber.setValue(newExpectedStatusSequenceNumber);
 
-        LOGGER.trace("Set ExpStatSN to " + expectedStatusSequenceNumber);
+        log.trace("Set ExpStatSN to " + expectedStatusSequenceNumber);
     }
 
     // --------------------------------------------------------------------------
@@ -214,7 +214,7 @@ public final class Connection {
         if (this.state != null) {
             do {
                 this.state.execute();
-                LOGGER.info("State is following: " + this.state.nextStateFollowing());
+                log.info("State is following: " + this.state.nextStateFollowing());
             } while (this.state.nextStateFollowing());
         }
 
@@ -261,7 +261,7 @@ public final class Connection {
     public final void close () throws IOException {
 
         senderReceiver.close();
-        LOGGER.debug("Connection with ID " + connectionID + " closed.");
+        log.debug("Connection with ID " + connectionID + " closed.");
     }
 
     /**

@@ -80,7 +80,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 
 public class LUTaskFactory implements TaskFactory
 {
-   private static Logger _logger = Logger.getLogger(LUTaskFactory.class);
+   private static Logger _logger = log.getLogger(LUTaskFactory.class);
 
    private static Map<Class<? extends CDB>, Class<? extends LUTask>> tasks =
          new HashMap<Class<? extends CDB>, Class<? extends LUTask>>();
@@ -117,14 +117,14 @@ public class LUTaskFactory implements TaskFactory
          }
          catch (InstantiationException e)
          {
-            _logger.error("Initiator attempted to execute unsupported command: ("
+            _log.error("Initiator attempted to execute unsupported command: ("
                   + command.getCommandDescriptorBlock().getOperationCode() + ") "
                   + command.getCommandDescriptorBlock().getClass().getName());
             throw new InvalidCommandOperationCodeException();
          }
          catch (IllegalAccessException e)
          {
-            _logger.error("Initiator attempted to execute unsupported command: ("
+            _log.error("Initiator attempted to execute unsupported command: ("
                   + command.getCommandDescriptorBlock().getOperationCode() + ") "
                   + command.getCommandDescriptorBlock().getClass().getName());
             throw new InvalidCommandOperationCodeException();

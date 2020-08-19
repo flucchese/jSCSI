@@ -46,8 +46,8 @@ import org.jscsi.parser.datasegment.OperationalTextKey;
 import org.jscsi.parser.datasegment.ResultFunctionFactory;
 import org.jscsi.parser.datasegment.SettingEntry;
 import org.jscsi.parser.datasegment.SettingsMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -128,7 +128,7 @@ public final class Configuration {
     // --------------------------------------------------------------------------
 
     /** The Log interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
+    private static final Logger log = LogManager.getLogger(Configuration.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
@@ -321,8 +321,8 @@ public final class Configuration {
                             se = globalConfig.get(e.getKey());
 
                             if (se == null) {
-                                if (LOGGER.isWarnEnabled()) {
-                                    LOGGER.warn("This key " + e.getKey() + " is not in the globalConfig.");
+                                if (log.isWarnEnabled()) {
+                                    log.warn("This key " + e.getKey() + " is not in the globalConfig.");
                                 }
                                 continue;
                             }
@@ -470,8 +470,8 @@ public final class Configuration {
                 }
             }
         } catch (UnknownHostException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("The given host is not reachable: " + e.getLocalizedMessage());
+            if (log.isErrorEnabled()) {
+                log.error("The given host is not reachable: " + e.getLocalizedMessage());
             }
         }
     }

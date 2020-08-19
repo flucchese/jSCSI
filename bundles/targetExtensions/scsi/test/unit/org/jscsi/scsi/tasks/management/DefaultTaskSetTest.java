@@ -83,7 +83,7 @@ public class DefaultTaskSetTest extends AbstractTaskSetTest
 {
    // TODO: Test abort(), clear(), clear(Nexus), and remove(Nexus) methods
 
-   private static Logger _logger = Logger.getLogger(DefaultTaskSetTest.class);
+   private static Logger _logger = log.getLogger(DefaultTaskSetTest.class);
 
    // 10 threads is an arbitrary value chosen to always allow simultaneous task execution
    // for all the following test cases.
@@ -110,16 +110,16 @@ public class DefaultTaskSetTest extends AbstractTaskSetTest
    {
       synchronized (task)
       {
-         _logger.debug("Testing framework waiting on task: " + task);
+         _log.debug("Testing framework waiting on task: " + task);
          synchronized (task)
          {
             while (!task.isDone())
             {
-               _logger.debug("testing framework waiting... (" + task + ")");
+               _log.debug("testing framework waiting... (" + task + ")");
                task.wait(loginterval);
             }
          }
-         _logger.debug("Testing framework found task is now complete: " + task);
+         _log.debug("Testing framework found task is now complete: " + task);
       }
    }
 
@@ -134,7 +134,7 @@ public class DefaultTaskSetTest extends AbstractTaskSetTest
       }
 
       Thread thread = new Thread(manager);
-      _logger.debug("Starting task manager: " + manager);
+      _log.debug("Starting task manager: " + manager);
       thread.start();
 
       for (TestTask task : taskSet)
@@ -334,7 +334,7 @@ public class DefaultTaskSetTest extends AbstractTaskSetTest
 
       // Start task manager
       Thread thread = new Thread(manager);
-      _logger.debug("Starting task manager with empty task set: " + manager);
+      _log.debug("Starting task manager with empty task set: " + manager);
       thread.start();
 
       // Waiting for 1 seconds
@@ -427,7 +427,7 @@ public class DefaultTaskSetTest extends AbstractTaskSetTest
 
       // Start task manager
       Thread thread = new Thread(manager);
-      _logger.debug("Starting task manager with empty task set: " + manager);
+      _log.debug("Starting task manager with empty task set: " + manager);
       thread.start();
 
       // Waiting for 1 seconds
@@ -528,7 +528,7 @@ public class DefaultTaskSetTest extends AbstractTaskSetTest
 
       // Start task manager
       Thread thread = new Thread(manager);
-      _logger.debug("Starting task manager with empty task set: " + manager);
+      _log.debug("Starting task manager with empty task set: " + manager);
       thread.start();
 
       // Waiting for 1 seconds

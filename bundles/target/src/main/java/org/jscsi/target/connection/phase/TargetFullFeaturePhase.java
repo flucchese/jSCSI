@@ -29,8 +29,8 @@ import org.jscsi.target.connection.stage.fullfeature.UnsupportedOpCodeStage;
 import org.jscsi.target.connection.stage.fullfeature.WriteStage;
 import org.jscsi.target.scsi.cdb.ScsiOperationCode;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class TargetFullFeaturePhase extends TargetPhase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TargetFullFeaturePhase.class);
+    private static final Logger log = LogManager.getLogger(TargetFullFeaturePhase.class);
 
     /**
      * The current stage of this phase.
@@ -90,7 +90,7 @@ public final class TargetFullFeaturePhase extends TargetPhase {
                         final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
                         ScsiOperationCode scsiOpCode = ScsiOperationCode.valueOf(parser.getCDB().get(0));
 
-                        LOGGER.debug("scsiOpCode = " + scsiOpCode);// log SCSI
+                        log.debug("scsiOpCode = " + scsiOpCode);// log SCSI
                                                                    // Operation Code
 
                         if (scsiOpCode != null) {
@@ -142,7 +142,7 @@ public final class TargetFullFeaturePhase extends TargetPhase {
                             }
                         }// else, or if default block was entered (programmer error)
                         if (scsiOpCode == null) {
-                            LOGGER.error("Unsupported SCSI OpCode 0x" + Integer.toHexString(parser.getCDB().get(0) & 255) + " in SCSI Command PDU.");
+                            log.error("Unsupported SCSI OpCode 0x" + Integer.toHexString(parser.getCDB().get(0) & 255) + " in SCSI Command PDU.");
                             stage = new UnsupportedOpCodeStage(this);
                         }
 
@@ -165,7 +165,7 @@ public final class TargetFullFeaturePhase extends TargetPhase {
                     running = false;
                     break;
                 default :
-                    LOGGER.error("Received unsupported opcode for " + pdu.getBasicHeaderSegment().getOpCode());
+                    log.error("Received unsupported opcode for " + pdu.getBasicHeaderSegment().getOpCode());
                     stage = new UnsupportedOpCodeStage(this);
             }
 

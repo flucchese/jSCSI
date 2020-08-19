@@ -83,8 +83,8 @@ final class GetConnectionsResponseState extends AbstractState {
         // final String response = new String(textDataSegment.array(), "UTF-8");
         // final String[] lines = response.split("\0");
         // } catch (UnsupportedEncodingException e) {
-        // if (LOGGER.isErrorEnabled()) {
-        // LOGGER.error("Unsupported Encoding Exception: " +
+        // if (log.isErrorEnabled()) {
+        // log.error("Unsupported Encoding Exception: " +
         // e.getLocalizedMessage());
         // }
         // }

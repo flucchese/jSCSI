@@ -72,7 +72,7 @@ import org.jscsi.scsi.target.Target;
 
 public class TestTargetTransportPort implements TargetTransportPort
 {
-   private static Logger _logger = Logger.getLogger(TestTargetTransportPort.class);
+   private static Logger _logger = log.getLogger(TestTargetTransportPort.class);
 
    private Random rnd = new Random();
 
@@ -90,7 +90,7 @@ public class TestTargetTransportPort implements TargetTransportPort
 
    public boolean readData(Nexus nexus, long cmdRef, ByteBuffer output) throws InterruptedException
    {
-      _logger.debug("servicing readData request: nexus: " + nexus + ", cmdRef: " + cmdRef);
+      _log.debug("servicing readData request: nexus: " + nexus + ", cmdRef: " + cmdRef);
       assert this.readDataMap.containsKey(cmdRef) : "read data unavailable for crn: " + cmdRef;
       output.put(this.readDataMap.get(cmdRef).array());
       return true;
@@ -98,22 +98,22 @@ public class TestTargetTransportPort implements TargetTransportPort
 
    public void registerTarget(Target target)
    {
-      _logger.debug("servicing registerTarget request");
+      _log.debug("servicing registerTarget request");
    }
 
    public void removeTarget(String targetName) throws Exception
    {
-      _logger.debug("servicing removeTarget request");
+      _log.debug("servicing removeTarget request");
    }
 
    public void terminateDataTransfer(Nexus nexus, long commandReferenceNumber)
    {
-      _logger.debug("servicing terminateDataTransfer request");
+      _log.debug("servicing terminateDataTransfer request");
    }
 
    public boolean writeData(Nexus nexus, long cmdRef, ByteBuffer input) throws InterruptedException
    {
-      _logger.debug("servicing writeData request: nexus: " + nexus + ", cmdRef: " + cmdRef);
+      _log.debug("servicing writeData request: nexus: " + nexus + ", cmdRef: " + cmdRef);
 
       ByteBuffer newbuf = ByteBuffer.allocate(input.limit() - input.position());
       newbuf.put(input);
@@ -127,9 +127,9 @@ public class TestTargetTransportPort implements TargetTransportPort
          Status status,
          ByteBuffer senseData)
    {
-      _logger.debug("servicing writeResponse request: nexus: " + nexus + ", cmdRef: "
+      _log.debug("servicing writeResponse request: nexus: " + nexus + ", cmdRef: "
             + commandReferenceNumber);
-      _logger.debug("response was status: " + status);
+      _log.debug("response was status: " + status);
       if (status.equals(Status.CHECK_CONDITION))
       {
          SenseData sense = null;
@@ -139,9 +139,9 @@ public class TestTargetTransportPort implements TargetTransportPort
          }
          catch (IOException e)
          {
-            _logger.warn("I/O exception while decoding sense data");
+            _log.warn("I/O exception while decoding sense data");
          }
-         _logger.error("sense data: " + sense);
+         _log.error("sense data: " + sense);
       }
    }
 

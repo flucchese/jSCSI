@@ -38,8 +38,8 @@ import org.jscsi.parser.text.TextRequestParser;
 import org.jscsi.parser.text.TextResponseParser;
 import org.jscsi.parser.tmf.TaskManagementFunctionRequestParser;
 import org.jscsi.parser.tmf.TaskManagementFunctionResponseParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -56,7 +56,7 @@ public final class MessageParserFactory {
     // --------------------------------------------------------------------------
 
     /** Logger Interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageParserFactory.class);
+    private static final Logger log = LogManager.getLogger(MessageParserFactory.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
@@ -130,8 +130,8 @@ public final class MessageParserFactory {
             case SCSI_RESPONSE :
                 return new SCSIResponseParser(protocolDataUnit);
             default :
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error("Parser not supported with this operation code " + operationCode);
+                if (log.isErrorEnabled()) {
+                    log.error("Parser not supported with this operation code " + operationCode);
                 }
                 throw new NoSuchElementException();
         }

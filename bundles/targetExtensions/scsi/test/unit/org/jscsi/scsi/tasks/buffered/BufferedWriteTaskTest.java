@@ -75,7 +75,7 @@ import org.junit.Test;
 
 public class BufferedWriteTaskTest extends BufferTestTask
 {
-   private static Logger _logger = Logger.getLogger(BufferedWriteTaskTest.class);
+   private static Logger _logger = log.getLogger(BufferedWriteTaskTest.class);
 
    private static final int WRITE_BLOCKS = 10;
 
@@ -88,7 +88,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite6inMemory()
    {
-      _logger.debug("********** WRITE6 MEMORY **********");
+      _log.debug("********** WRITE6 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write6(false, true, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);
@@ -102,7 +102,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite6inFile()
    {
-      _logger.debug("********** WRITE6 FILE **********");
+      _log.debug("********** WRITE6 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write6(false, true, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);
@@ -116,7 +116,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite10inMemory()
    {
-      _logger.debug("********** WRITE10 MEMORY **********");
+      _log.debug("********** WRITE10 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write10(0, false, false, false, false, false, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);
@@ -130,7 +130,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite10inFile()
    {
-      _logger.debug("********** WRITE10 FILE **********");
+      _log.debug("********** WRITE10 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write10(0, false, false, false, false, false, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);
@@ -144,7 +144,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite12InMemory()
    {
-      _logger.debug("********** WRITE12 MEMORY **********");
+      _log.debug("********** WRITE12 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write12(0, false, false, false, false, false, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);
@@ -158,7 +158,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite12InFile()
    {
-      _logger.debug("********** WRITE12 FILE **********");
+      _log.debug("********** WRITE12 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write12(0, false, false, false, false, false, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);
@@ -172,7 +172,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite16inMemory()
    {
-      _logger.debug("********** WRITE16 MEMORY **********");
+      _log.debug("********** WRITE16 MEMORY **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write16(0, false, false, false, false, false, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);
@@ -186,7 +186,7 @@ public class BufferedWriteTaskTest extends BufferTestTask
    @Test
    public void testWrite16inFile()
    {
-      _logger.debug("********** WRITE16 FILE **********");
+      _log.debug("********** WRITE16 FILE **********");
       int lba = generateRandomLBA();
       CDB cdb = new Write16(0, false, false, false, false, false, lba, WRITE_BLOCKS);
       ByteBuffer data = this.createReadData(WRITE_BLOCKS * STORE_BLOCK_SIZE, cmdRef);

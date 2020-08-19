@@ -23,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.OperationCode;
 import org.jscsi.parser.ProtocolDataUnit;
@@ -32,9 +34,6 @@ import org.jscsi.target.connection.Connection.TargetConnection;
 import org.jscsi.target.connection.TargetSession;
 import org.jscsi.target.scsi.inquiry.DeviceIdentificationVpdPage;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * The central class of the jSCSI Target, which keeps track of all active {@link TargetSession}s, stores target-wide
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TargetServer implements Callable<Void> {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(TargetServer.class);
+    protected static final Logger log = LogManager.getLogger(TargetServer.class);
 
     /**
      * A {@link SocketChannel} used for listening to incoming connections.
@@ -91,19 +90,19 @@ public class TargetServer implements Callable<Void> {
     public TargetServer (final Configuration conf) {
         this.config = conf;
 
-        LOGGER.debug("Starting jSCSI-target: ");
+        log.debug("Starting jSCSI-target: ");
 
         // read target settings from configuration file
 
-        LOGGER.debug("   port:           " + getConfig().getPort());
-        LOGGER.debug("   loading targets.");
+        log.debug("   port:           " + getConfig().getPort());
+        log.debug("   loading targets.");
         // open the storage medium
         List<Target> targetInfo = getConfig().getTargets();
         for (Target curTargetInfo : targetInfo) {
 
             targets.put(curTargetInfo.getTargetName(), curTargetInfo);
             // print configuration and medium details
-            LOGGER.debug("   target name:    " + curTargetInfo.getTargetName() + " loaded.");
+            log.debug("   target name:    " + curTargetInfo.getTargetName() + " loaded.");
         }
 
         this.deviceIdentificationVpdPage = new DeviceIdentificationVpdPage(this);
@@ -212,7 +211,7 @@ public class TargetServer implements Callable<Void> {
             try {
                 targetConnection.call();
             } catch (Exception e) {
-                LOGGER.error("running target error:", e);
+                log.error("running target error:", e);
             } finally {
                 // coming back from call() means the session is ended
                 // we can delete the target from local cache.
@@ -223,11 +222,11 @@ public class TargetServer implements Callable<Void> {
                         try {
                             target.getStorageModule().close();
                         } catch (Exception e) {
-                            LOGGER.error("Error when closing storage:", e);
+                            log.error("Error when closing storage:", e);
                         }
-                        LOGGER.info("closed local storage module");
+                        log.info("closed local storage module");
                     } else {
-                        LOGGER.warn("No target to delete on logout?");
+                        log.warn("No target to delete on logout?");
                     }
                 }
             }
@@ -284,13 +283,13 @@ public class TargetServer implements Callable<Void> {
                     // threadPool.submit(connection);// ignore returned Future
                     workerPool.submit(new ConnectionHandler(newConnection)); // ignore returned Future
                 } catch (DigestException | InternetSCSIException | SettingsException e) {
-                    LOGGER.info("Throws Exception", e);
+                    log.info("Throws Exception", e);
                     continue;
                 }
             }
         } catch (IOException e) {
             // this block is entered if the desired port is already in use
-            LOGGER.error("Throws Exception", e);
+            log.error("Throws Exception", e);
         }
 
         System.out.println("Closing socket channel.");
@@ -349,7 +348,7 @@ public class TargetServer implements Callable<Void> {
         for(TargetSession session : sessions){
             if(!session.getConnection().stop()){
                 this.running = true;
-                LOGGER.error("Unable to stop session for " + session.getTargetName());
+                log.error("Unable to stop session for " + session.getTargetName());
             }
         }
     }

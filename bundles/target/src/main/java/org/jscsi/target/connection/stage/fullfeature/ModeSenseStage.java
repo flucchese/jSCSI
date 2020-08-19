@@ -18,8 +18,8 @@ import org.jscsi.target.scsi.modeSense.ModeParameterList;
 import org.jscsi.target.scsi.modeSense.ModeParameterListBuilder;
 import org.jscsi.target.scsi.modeSense.ShortLogicalBlockDescriptor;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ModeSenseStage extends TargetFullFeatureStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModeSenseStage.class);
+    private static final Logger log = LogManager.getLogger(ModeSenseStage.class);
 
     public ModeSenseStage (TargetFullFeaturePhase targetFullFeaturePhase) {
         super(targetFullFeaturePhase);
@@ -42,13 +42,13 @@ public final class ModeSenseStage extends TargetFullFeatureStage {
         final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
         final ModeSense6Cdb cdb = new ModeSense6Cdb(parser.getCDB());
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(Boolean.toString(cdb.getDisableBlockDescriptors()));
-            LOGGER.debug(cdb.getPageControl().toString());
-            LOGGER.debug(Integer.toString(cdb.getPageCode()));
-            LOGGER.debug(Integer.toString(cdb.getSubpageCode()));
-            LOGGER.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
-            // LOGGER.debug(cdb.getModePage());
+        if (log.isDebugEnabled()) {
+            log.debug(Boolean.toString(cdb.getDisableBlockDescriptors()));
+            log.debug(cdb.getPageControl().toString());
+            log.debug(Integer.toString(cdb.getPageCode()));
+            log.debug(Integer.toString(cdb.getSubpageCode()));
+            log.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
+            // log.debug(cdb.getModePage());
         }
 
         // final PageControl pageControl = cdb.getPageControl();//see 8 lines

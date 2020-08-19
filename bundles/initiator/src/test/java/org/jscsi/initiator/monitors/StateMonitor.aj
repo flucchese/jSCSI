@@ -42,8 +42,8 @@ import org.jscsi.initiator.connection.state.WriteRequestState;
 import org.jscsi.initiator.connection.state.WriteSecondBurstState;
 import org.jscsi.initiator.connection.state.WriteSecondResponseState;
 import org.jscsi.state.StatePattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * This aspect is used to keep
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 public aspect StateMonitor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("StateMonitor");
+    private static final Logger log = LogManager.getLogger("StateMonitor");
 
     /** The current state int the process */
     private static StatePattern currentState = null;
@@ -69,7 +69,7 @@ public aspect StateMonitor {
 		call(* IState.execute()) && target(s);
 
     before(IState s) : execute(s){
-        LOGGER.info("Executing state: " + s.toString());
+        log.info("Executing state: " + s.toString());
 
         if (currentState == null) {
             Assert.assertTrue(s instanceof LoginRequestState);
@@ -142,6 +142,6 @@ public aspect StateMonitor {
     }
 
     after(IState s) : execute(s){
-        LOGGER.info("Finished state execution of " + s.toString());
+        log.info("Finished state execution of " + s.toString());
     }
 }

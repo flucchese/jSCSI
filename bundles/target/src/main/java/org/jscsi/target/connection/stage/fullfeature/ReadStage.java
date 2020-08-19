@@ -17,8 +17,8 @@ import org.jscsi.target.scsi.cdb.Read6Cdb;
 import org.jscsi.target.scsi.cdb.ReadCdb;
 import org.jscsi.target.scsi.cdb.ScsiOperationCode;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ReadStage extends ReadOrWriteStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReadStage.class);
+    private static final Logger log = LogManager.getLogger(ReadStage.class);
 
     public ReadStage (final TargetFullFeaturePhase targetFullFeaturePhase) {
         super(targetFullFeaturePhase);
@@ -41,9 +41,9 @@ public class ReadStage extends ReadOrWriteStage {
         // ... from settings
         final boolean immediateData = settings.getImmediateData();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("immediateData = " + immediateData);
-            LOGGER.debug("maxRecvDataSegmentLength = " + settings.getMaxRecvDataSegmentLength());
+        if (log.isDebugEnabled()) {
+            log.debug("immediateData = " + immediateData);
+            log.debug("maxRecvDataSegmentLength = " + settings.getMaxRecvDataSegmentLength());
         }
 
         // ... and from the PDU
@@ -71,7 +71,7 @@ public class ReadStage extends ReadOrWriteStage {
         if (cdb.getIllegalFieldPointers() != null) {
             // the command must fail
 
-            LOGGER.debug("illegal field in Read CDB");
+            log.debug("illegal field in Read CDB");
 
             // create and send error PDU and leave stage
             final ProtocolDataUnit responsePdu = createFixedFormatErrorPdu(cdb.getIllegalFieldPointers(),// senseKeySpecificData
@@ -83,11 +83,11 @@ public class ReadStage extends ReadOrWriteStage {
         final int totalTransferLength = session.getStorageModule().getBlockSize() * cdb.getTransferLength();
         final long storageOffset = session.getStorageModule().getBlockSize() * cdb.getLogicalBlockAddress();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("cdb.getLogicalBlockAddress() = " + cdb.getLogicalBlockAddress());
-            LOGGER.debug("blockSize = " + session.getStorageModule().getBlockSize());
-            LOGGER.debug("totalTransferLength = " + totalTransferLength);
-            LOGGER.debug("expectedDataSegmentLength = " + parser.getExpectedDataTransferLength());
+        if (log.isDebugEnabled()) {
+            log.debug("cdb.getLogicalBlockAddress() = " + cdb.getLogicalBlockAddress());
+            log.debug("blockSize = " + session.getStorageModule().getBlockSize());
+            log.debug("totalTransferLength = " + totalTransferLength);
+            log.debug("expectedDataSegmentLength = " + parser.getExpectedDataTransferLength());
         }
 
         // *** start sending ***
@@ -172,7 +172,7 @@ public class ReadStage extends ReadOrWriteStage {
                 0,// residualCount
                 dataSegment);
 
-        LOGGER.debug("sending last Data-In PDU");
+        log.debug("sending last Data-In PDU");
         connection.sendPdu(responsePdu);
 
         // send SCSI Response PDU?
@@ -192,7 +192,7 @@ public class ReadStage extends ReadOrWriteStage {
                     ScsiResponseDataSegment.EMPTY_DATA_SEGMENT);// empty
                                                                 // ScsiResponseDataSegment
 
-            LOGGER.debug("sending SCSI Response PDU");
+            log.debug("sending SCSI Response PDU");
             connection.sendPdu(responsePdu);
         }
 

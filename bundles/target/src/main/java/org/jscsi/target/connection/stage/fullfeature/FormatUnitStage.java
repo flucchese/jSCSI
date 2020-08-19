@@ -22,8 +22,8 @@ import org.jscsi.target.scsi.sense.SenseKey;
 import org.jscsi.target.scsi.sense.information.FourByteInformation;
 import org.jscsi.target.scsi.sense.senseDataDescriptor.senseKeySpecific.FieldPointerSenseKeySpecificData;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FormatUnitStage extends TargetFullFeatureStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReadStage.class);
+    private static final Logger log = LogManager.getLogger(ReadStage.class);
 
     public FormatUnitStage (TargetFullFeaturePhase targetFullFeaturePhase) {
         super(targetFullFeaturePhase);
@@ -57,7 +57,7 @@ public class FormatUnitStage extends TargetFullFeatureStage {
     @Override
     public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
-        LOGGER.debug("Initiator has sent FORMAT UNIT command.");
+        log.debug("Initiator has sent FORMAT UNIT command.");
 
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
         final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();

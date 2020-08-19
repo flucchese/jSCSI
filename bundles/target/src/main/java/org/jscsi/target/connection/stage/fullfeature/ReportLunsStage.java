@@ -14,8 +14,8 @@ import org.jscsi.target.scsi.cdb.SelectReport;
 import org.jscsi.target.scsi.lun.ReportLunsParameterData;
 import org.jscsi.target.scsi.sense.senseDataDescriptor.senseKeySpecific.FieldPointerSenseKeySpecificData;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ReportLunsStage extends TargetFullFeatureStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportLunsStage.class);
+    private static final Logger log = LogManager.getLogger(ReportLunsStage.class);
 
     public ReportLunsStage (TargetFullFeaturePhase targetFullFeaturePhase) {
         super(targetFullFeaturePhase);
@@ -56,7 +56,7 @@ public class ReportLunsStage extends TargetFullFeatureStage {
             // PDU is okay
             // carry out command
             final SelectReport selectReport = cdb.getSelectReport();
-            LOGGER.debug("selectReport = " + selectReport);
+            log.debug("selectReport = " + selectReport);
 
             // there are only well known LUNs
             ReportLunsParameterData reportLunsParameterData;

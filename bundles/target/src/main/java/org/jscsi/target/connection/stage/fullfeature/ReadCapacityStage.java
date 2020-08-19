@@ -18,13 +18,13 @@ import org.jscsi.target.scsi.readCapacity.ReadCapacityParameterData;
 import org.jscsi.target.scsi.sense.AdditionalSenseCodeAndQualifier;
 import org.jscsi.target.scsi.sense.senseDataDescriptor.senseKeySpecific.FieldPointerSenseKeySpecificData;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 public final class ReadCapacityStage extends TargetFullFeatureStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReadCapacityStage.class);
+    private static final Logger log = LogManager.getLogger(ReadCapacityStage.class);
 
     public ReadCapacityStage (final TargetFullFeaturePhase targetFullFeaturePhase) {
         super(targetFullFeaturePhase);
@@ -57,7 +57,7 @@ public final class ReadCapacityStage extends TargetFullFeatureStage {
         // appropriate response
         if (session.getStorageModule().checkBounds(cdb.getLogicalBlockAddress(), 0) != 0) {
             // invalid, log error, send error PDU, and return
-            LOGGER.error("encountered " + cdb.getClass() + " in ReadCapacityStage with " + "LOGICAL BLOCK ADDRESS = " + cdb.getLogicalBlockAddress());
+            log.error("encountered " + cdb.getClass() + " in ReadCapacityStage with " + "LOGICAL BLOCK ADDRESS = " + cdb.getLogicalBlockAddress());
 
             final FieldPointerSenseKeySpecificData fp = new FieldPointerSenseKeySpecificData(true,// senseKeySpecificDataValid
             true,// commandData (i.e. invalid field in CDB)

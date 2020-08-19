@@ -24,8 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -41,7 +41,7 @@ public final class SettingsMap {
     // --------------------------------------------------------------------------
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsMap.class);
+    private static final Logger log = LogManager.getLogger(SettingsMap.class);
 
     /** Delimiter between the key and the value of a key-value-pair. */
     private static final String KEY_VALUE_DELIMITER = "=";
@@ -126,8 +126,8 @@ public final class SettingsMap {
 
         String updatedValue;
         if (oldValue == null) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Update old value failed: No old value for key " + textKey.value() + ".");
+            if (log.isWarnEnabled()) {
+                log.warn("Update old value failed: No old value for key " + textKey.value() + ".");
             }
 
             updatedValue = newTextValue;
@@ -178,7 +178,7 @@ public final class SettingsMap {
             }
 
             if (settingsMap.size() != aMap.size()) {
-                // LOGGER.error("The maps have different sizes.");
+                // log.error("The maps have different sizes.");
                 break;
             }
 
@@ -190,7 +190,7 @@ public final class SettingsMap {
                 value = e.getValue();
 
                 if (!settingsMap.containsKey(key)) {
-                    // LOGGER.error("KeyValuePair does not contain a key: " +
+                    // log.error("KeyValuePair does not contain a key: " +
                     // key);
 
                     return false;
@@ -200,9 +200,9 @@ public final class SettingsMap {
                     // LOGGER
                     // .error("KeyValuePair does not pass the compareTo method with key "
                     // + key);
-                    // LOGGER.error("Value in KeyValuePair: " +
+                    // log.error("Value in KeyValuePair: " +
                     // settingsMap.get(key));
-                    // LOGGER.error("Value should be: " + value);
+                    // log.error("Value should be: " + value);
 
                     return false;
                 }

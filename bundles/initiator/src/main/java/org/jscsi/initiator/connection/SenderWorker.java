@@ -31,8 +31,8 @@ import org.jscsi.parser.ProtocolDataUnit;
 import org.jscsi.parser.ProtocolDataUnitFactory;
 import org.jscsi.parser.TargetMessageParser;
 import org.jscsi.parser.datasegment.OperationalTextKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -48,7 +48,7 @@ public final class SenderWorker {
     // --------------------------------------------------------------------------
 
     /** The logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SenderWorker.class);
+    private static final Logger log = LogManager.getLogger(SenderWorker.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
@@ -122,11 +122,11 @@ public final class SenderWorker {
             throw new InternetSCSIException(e);
         }
 
-        LOGGER.debug("Receiving this PDU: " + protocolDataUnit);
+        log.debug("Receiving this PDU: " + protocolDataUnit);
 
         final Exception isCorrect = connection.getState().isCorrect(protocolDataUnit);
         if (isCorrect == null) {
-            LOGGER.trace("Adding PDU to Receiving Queue.");
+            log.trace("Adding PDU to Receiving Queue.");
 
             final TargetMessageParser parser = (TargetMessageParser) protocolDataUnit.getBasicHeaderSegment().getParser();
             final Session session = connection.getSession();
@@ -143,7 +143,7 @@ public final class SenderWorker {
                 if (connection.getExpectedStatusSequenceNumber().compareTo(parser.getStatusSequenceNumber()) >= 0) {
                     connection.incrementExpectedStatusSequenceNumber();
                 } else {
-                    LOGGER.error("Status Sequence Number Mismatch (received, expected): " + parser.getStatusSequenceNumber() + ", " + (connection.getExpectedStatusSequenceNumber().getValue() - 1));
+                    log.error("Status Sequence Number Mismatch (received, expected): " + parser.getStatusSequenceNumber() + ", " + (connection.getExpectedStatusSequenceNumber().getValue() - 1));
                 }
 
             }
@@ -178,7 +178,7 @@ public final class SenderWorker {
 
         unit.write(socketChannel);
 
-        LOGGER.debug("Sending this PDU: " + unit);
+        log.debug("Sending this PDU: " + unit);
 
         // increment the Command Sequence Number
         if (parser.incrementSequenceNumber()) {

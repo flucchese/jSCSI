@@ -76,7 +76,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 //TODO: Describe class or interface
 public class InquiryTask extends LUTask
 {
-   private static Logger _logger = Logger.getLogger(InquiryTask.class);
+   private static Logger _logger = log.getLogger(InquiryTask.class);
 
    public InquiryTask()
    {
@@ -111,14 +111,14 @@ public class InquiryTask extends LUTask
             }
             catch (IOException e)
             {
-               _logger.debug("cound not encode vpd page in task: " + this);
+               _log.debug("cound not encode vpd page in task: " + this);
                throw new RuntimeException("Could not encode VPD page", e);
             }
          }
          else
          {
             // Invalid page code
-            _logger.debug("invalid page code in task: " + this);
+            _log.debug("invalid page code in task: " + this);
             throw new InvalidFieldInCDBException(true, 2);
          }
       }
@@ -131,7 +131,7 @@ public class InquiryTask extends LUTask
          else
          {
             // Invalid page code
-            _logger.debug("invalid page code in task: " + this);
+            _log.debug("invalid page code in task: " + this);
             throw new InvalidFieldInCDBException(true, 2);
          }
       }

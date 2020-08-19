@@ -77,7 +77,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 
 public class RequestSenseTask extends LUTask
 {
-   private static Logger _logger = Logger.getLogger(RequestSenseTask.class);
+   private static Logger _logger = log.getLogger(RequestSenseTask.class);
 
    public RequestSenseTask()
    {
@@ -96,7 +96,7 @@ public class RequestSenseTask extends LUTask
    @Override
    protected void execute() throws InterruptedException, SenseException
    {
-      _logger.debug("executing logical unit 'request sense' task");
+      _log.debug("executing logical unit 'request sense' task");
 
       RequestSense cdb = (RequestSense) getCommand().getCommandDescriptorBlock();
 
@@ -116,7 +116,7 @@ public class RequestSenseTask extends LUTask
       }
       catch (IOException e)
       {
-         _logger.error("unable to encode sense data: " + e);
+         _log.error("unable to encode sense data: " + e);
          throw new RuntimeException("unable to encode sense data", e);
       }
 

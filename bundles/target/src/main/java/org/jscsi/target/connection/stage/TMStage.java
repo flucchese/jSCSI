@@ -14,8 +14,8 @@ import org.jscsi.target.connection.TargetPduFactory;
 import org.jscsi.target.connection.phase.TargetFullFeaturePhase;
 import org.jscsi.target.connection.stage.fullfeature.TargetFullFeatureStage;
 import org.jscsi.target.settings.SettingsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TMStage extends TargetFullFeatureStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TMStage.class);
+    private static final Logger log = LogManager.getLogger(TMStage.class);
 
     /**
      * @param targetFullFeaturePhase
@@ -47,10 +47,10 @@ public class TMStage extends TargetFullFeatureStage {
 
         switch (parser.getFunction()) {
             case ABORT_TASK :
-                LOGGER.error("ABORT_TASK");
+                log.error("ABORT_TASK");
                 break;
             case ABORT_TASK_SET :
-                LOGGER.error("ABORT_TASK_SET");
+                log.error("ABORT_TASK_SET");
                 break;
             case CLEAR_ACA :
                 responseCode = ResponseCode.FUNCTION_COMPLETE;
@@ -59,16 +59,16 @@ public class TMStage extends TargetFullFeatureStage {
                 responseCode = ResponseCode.FUNCTION_COMPLETE;
                 break;
             case LUN_RESET :
-                LOGGER.error("LUN_RESET");
+                log.error("LUN_RESET");
                 break;
             case TARGET_WARM_RESET :
-                LOGGER.error("TARGET_WARM_RESET");
+                log.error("TARGET_WARM_RESET");
                 break;
             case TARGET_COLD_RESET :
-                LOGGER.error("TARGET_COLD_RESET");
+                log.error("TARGET_COLD_RESET");
                 break;
             case TASK_REASSIGN :
-                LOGGER.error("TASK_REASSIGN");
+                log.error("TASK_REASSIGN");
                 break;
             default :
                 break;

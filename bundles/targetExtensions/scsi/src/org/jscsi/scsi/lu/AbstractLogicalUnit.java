@@ -77,7 +77,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 //TODO: Describe class or interface
 public abstract class AbstractLogicalUnit implements LogicalUnit
 {
-   private static Logger _logger = Logger.getLogger(AbstractLogicalUnit.class);
+   private static Logger _logger = log.getLogger(AbstractLogicalUnit.class);
 
    private TaskSet taskSet;
    private TaskManager taskManager;
@@ -104,18 +104,18 @@ public abstract class AbstractLogicalUnit implements LogicalUnit
 
    public void enqueue(TargetTransportPort port, Command command)
    {
-      if (_logger.isDebugEnabled())
+      if (_log.isDebugEnabled())
       {
-         _logger.debug("enqueuing command: " + command + ", associated with TargetTransportPort: "
+         _log.debug("enqueuing command: " + command + ", associated with TargetTransportPort: "
                + port);
       }
       try
       {
          Task task = this.getTaskFactory().getInstance(port, command);
          assert task != null : "improper task factory implementation returned null task";
-         if (_logger.isDebugEnabled())
+         if (_log.isDebugEnabled())
          {
-            _logger.debug("successfully constructed task: " + task);
+            _log.debug("successfully constructed task: " + task);
          }
          this.taskSet.offer(task); // non-blocking, task set sends any errors to transport port
       }
@@ -134,17 +134,17 @@ public abstract class AbstractLogicalUnit implements LogicalUnit
 
    public void stop()
    {
-      _logger.debug("Signalling LU task manager to stop");
+      _log.debug("Signalling LU task manager to stop");
       this.manager.interrupt();
       try
       {
-         _logger.debug("Waiting for LU task manager to terminate");
+         _log.debug("Waiting for LU task manager to terminate");
          this.manager.join();
-         _logger.debug("LU task manger finished");
+         _log.debug("LU task manger finished");
       }
       catch (InterruptedException e)
       {
-         _logger.warn("Interrupted while waiting for LU task manager to finish");
+         _log.warn("Interrupted while waiting for LU task manager to finish");
       }
    }
 

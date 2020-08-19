@@ -17,8 +17,8 @@ import org.jscsi.target.scsi.inquiry.SupportedVpdPages;
 import org.jscsi.target.scsi.sense.senseDataDescriptor.senseKeySpecific.FieldPointerSenseKeySpecificData;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.util.Debug;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class InquiryStage extends TargetFullFeatureStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InquiryStage.class);
+    private static final Logger log = LogManager.getLogger(InquiryStage.class);
 
     public InquiryStage (TargetFullFeaturePhase targetFullFeaturePhase) {
         super(targetFullFeaturePhase);
@@ -43,24 +43,24 @@ public class InquiryStage extends TargetFullFeatureStage {
         ProtocolDataUnit responsePdu;// the response PDU
 
         // get command details in CDB
-        if (LOGGER.isDebugEnabled()) {// print CDB bytes
-            LOGGER.debug("CDB bytes: \n" + Debug.byteBufferToString(parser.getCDB()));
+        if (log.isDebugEnabled()) {// print CDB bytes
+            log.debug("CDB bytes: \n" + Debug.byteBufferToString(parser.getCDB()));
         }
 
         final InquiryCDB cdb = new InquiryCDB(parser.getCDB());
         final FieldPointerSenseKeySpecificData[] illegalFieldPointers = cdb.getIllegalFieldPointers();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
-            LOGGER.debug("cdb.getEnableVitalProductData() = " + cdb.getEnableVitalProductData());
-            LOGGER.debug("cdb.isNormalACA() = " + cdb.isNormalACA());
-            LOGGER.debug("cdb.getPageCode() = " + cdb.getPageCode());
-            LOGGER.debug("cdb.getPageCode().getVitalProductDataPageName() = " + cdb.getPageCode().getVitalProductDataPageName());
+        if (log.isDebugEnabled()) {
+            log.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
+            log.debug("cdb.getEnableVitalProductData() = " + cdb.getEnableVitalProductData());
+            log.debug("cdb.isNormalACA() = " + cdb.isNormalACA());
+            log.debug("cdb.getPageCode() = " + cdb.getPageCode());
+            log.debug("cdb.getPageCode().getVitalProductDataPageName() = " + cdb.getPageCode().getVitalProductDataPageName());
         }
 
         if (illegalFieldPointers != null) {
             // an illegal request has been made
-            LOGGER.error("illegal INQUIRY request");
+            log.error("illegal INQUIRY request");
 
             responsePdu = createFixedFormatErrorPdu(illegalFieldPointers, bhs.getInitiatorTaskTag(), parser.getExpectedDataTransferLength());
 

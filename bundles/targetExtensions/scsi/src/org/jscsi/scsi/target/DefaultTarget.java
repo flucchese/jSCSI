@@ -45,7 +45,7 @@ import org.jscsi.scsi.transport.TargetTransportPort;
 
 public class DefaultTarget extends AbstractTarget
 {
-   private static Logger _logger = Logger.getLogger(DefaultTarget.class);
+   private static Logger _logger = log.getLogger(DefaultTarget.class);
 
    private boolean running = false;
    private TaskRouter taskRouter;
@@ -84,14 +84,14 @@ public class DefaultTarget extends AbstractTarget
 
    public synchronized void start()
    {
-      _logger.debug("Starting task router for target " + this.getTargetName());
+      _log.debug("Starting task router for target " + this.getTargetName());
       this.taskRouter.start();
       this.running = true;
    }
 
    public synchronized void stop()
    {
-      _logger.debug("Stopping task router for target " + this.getTargetName());
+      _log.debug("Stopping task router for target " + this.getTargetName());
       this.taskRouter.stop();
    }
 

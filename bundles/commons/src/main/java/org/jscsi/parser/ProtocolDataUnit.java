@@ -31,8 +31,8 @@ import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.datasegment.AbstractDataSegment;
 import org.jscsi.parser.datasegment.IDataSegmentIterator.IDataSegmentChunk;
 import org.jscsi.parser.digest.IDigest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -51,7 +51,7 @@ public final class ProtocolDataUnit {
     private static final int AHS_INITIAL_SIZE = 0;
 
     /** The Log interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDataUnit.class);
+    private static final Logger log = LogManager.getLogger(ProtocolDataUnit.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
@@ -129,8 +129,8 @@ public final class ProtocolDataUnit {
         int offset = 0;
         offset += basicHeaderSegment.serialize(pdu, offset);
 
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Serialized Basic Header Segment:\n" + toString());
+        if (log.isTraceEnabled()) {
+            log.trace("Serialized Basic Header Segment:\n" + toString());
         }
 
         offset += serializeAdditionalHeaderSegments(pdu, offset);
@@ -192,8 +192,8 @@ public final class ProtocolDataUnit {
             len += deserializeDigest(bhs, bhs.position() - BasicHeaderSegment.BHS_FIXED_SIZE, BasicHeaderSegment.BHS_FIXED_SIZE, headerDigest);
         }
 
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Deserialized Basic Header Segment:\n" + toString());
+        if (log.isTraceEnabled()) {
+            log.trace("Deserialized Basic Header Segment:\n" + toString());
         }
 
         return len;
@@ -321,8 +321,8 @@ public final class ProtocolDataUnit {
     public final int write (final SocketChannel sChannel) throws InternetSCSIException , IOException {
 
         // print debug informations
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(basicHeaderSegment.getParser().getShortInfo());
+        if (log.isTraceEnabled()) {
+            log.trace(basicHeaderSegment.getParser().getShortInfo());
         }
 
         final ByteBuffer src = serialize();
@@ -361,7 +361,7 @@ public final class ProtocolDataUnit {
                 return lens;
             }
             len += lens;
-            LOGGER.trace("Receiving through SocketChannel: " + len + " of maximal " + BasicHeaderSegment.BHS_FIXED_SIZE);
+            log.trace("Receiving through SocketChannel: " + len + " of maximal " + BasicHeaderSegment.BHS_FIXED_SIZE);
 
         }
         bhs.flip();
@@ -391,8 +391,8 @@ public final class ProtocolDataUnit {
         }
 
         // print debug informations
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(basicHeaderSegment.getParser().getShortInfo());
+        if (log.isTraceEnabled()) {
+            log.trace(basicHeaderSegment.getParser().getShortInfo());
         }
 
         return len;

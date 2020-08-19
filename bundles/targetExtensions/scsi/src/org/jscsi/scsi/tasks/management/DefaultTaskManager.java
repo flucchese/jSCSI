@@ -69,7 +69,7 @@ import org.jscsi.scsi.tasks.Task;
 
 public class DefaultTaskManager implements TaskManager
 {
-   private static Logger _logger = Logger.getLogger(DefaultTaskManager.class);
+   private static Logger _logger = log.getLogger(DefaultTaskManager.class);
 
    private ExecutorService executor;
    private final AtomicBoolean running = new AtomicBoolean(false);
@@ -100,27 +100,27 @@ public class DefaultTaskManager implements TaskManager
          Task nextTask = null;
          try
          {
-            if (_logger.isDebugEnabled())
-               _logger.debug("Waiting for next task...");
+            if (_log.isDebugEnabled())
+               _log.debug("Waiting for next task...");
             nextTask = this.taskSet.take();
-            if (_logger.isDebugEnabled())
-               _logger.debug("next from taskset is task: " + nextTask.getCommand());
+            if (_log.isDebugEnabled())
+               _log.debug("next from taskset is task: " + nextTask.getCommand());
             this.executor.submit(nextTask);
-            if (_logger.isDebugEnabled())
-               _logger.debug("submitted for execution command: " + nextTask.getCommand());
+            if (_log.isDebugEnabled())
+               _log.debug("submitted for execution command: " + nextTask.getCommand());
          }
          catch (InterruptedException e)
          {
-            _logger.debug("Task manager thread interrupted.");
+            _log.debug("Task manager thread interrupted.");
             this.running.set(false);
          }
          catch (Exception e)
          {
-            _logger.debug("Task manager experienced an unhandled exception, shutting down");
+            _log.debug("Task manager experienced an unhandled exception, shutting down");
             this.running.set(false);
          }
       }
-      _logger.info("Shutting down task manager.");
+      _log.info("Shutting down task manager.");
 
       this.taskSet.clear();
       executor.shutdown();

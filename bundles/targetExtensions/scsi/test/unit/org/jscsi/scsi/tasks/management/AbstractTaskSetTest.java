@@ -96,7 +96,7 @@ public class AbstractTaskSetTest
 
    public static abstract class TestTask implements Task
    {
-      private static Logger _logger = Logger.getLogger(TestTask.class);
+      private static Logger _logger = log.getLogger(TestTask.class);
 
       private Command command;
       private TargetTransportPort port;
@@ -109,7 +109,7 @@ public class AbstractTaskSetTest
          this.port = null;
          this.delay = delay;
          this.command = new Command(nexus, (CDB) null, attribute, 0, 0);
-         _logger.debug("constructed TestTask: " + this);
+         _log.debug("constructed TestTask: " + this);
       }
 
       public TestTask(TargetTransportPort port, Nexus nexus, TaskAttribute attribute, long delay)
@@ -117,7 +117,7 @@ public class AbstractTaskSetTest
          this.port = port;
          this.delay = delay;
          this.command = new Command(nexus, (CDB) null, attribute, 0, 0);
-         _logger.debug("constructed TestTask: " + this);
+         _log.debug("constructed TestTask: " + this);
       }
 
       /**
@@ -178,14 +178,14 @@ public class AbstractTaskSetTest
 
          this.thread = Thread.currentThread();
 
-         _logger.debug("executing task: " + this);
+         _log.debug("executing task: " + this);
          this.checkProperExecution();
 
          try
          {
-            _logger.debug("sleeping for " + this.delay + ": " + this);
+            _log.debug("sleeping for " + this.delay + ": " + this);
             Thread.sleep(this.delay);
-            _logger.debug("done sleeping: " + this);
+            _log.debug("done sleeping: " + this);
          }
          catch (InterruptedException e)
          {
@@ -194,11 +194,11 @@ public class AbstractTaskSetTest
 
          synchronized (this)
          {
-            _logger.debug("marking task as done: " + this);
+            _log.debug("marking task as done: " + this);
             this.done = true;
             this.notifyAll();
          }
-         _logger.debug("leaving run method: " + this);
+         _log.debug("leaving run method: " + this);
       }
 
       public Command getCommand()
@@ -226,7 +226,7 @@ public class AbstractTaskSetTest
 
    public static class SimpleTask extends TestTask
    {
-      private static Logger _logger = Logger.getLogger(HeadOfQueueTask.class);
+      private static Logger _logger = log.getLogger(HeadOfQueueTask.class);
 
       private List<TestTask> taskSet;
       private int index;
@@ -253,7 +253,7 @@ public class AbstractTaskSetTest
       @Override
       protected void checkProperExecution()
       {
-         _logger.debug("Checking for proper execution order: " + this);
+         _log.debug("Checking for proper execution order: " + this);
          synchronized (this.taskSet)
          {
             this.properStart = true;
@@ -317,7 +317,7 @@ public class AbstractTaskSetTest
    public static class HeadOfQueueTask extends TestTask
    {
 
-      private static Logger _logger = Logger.getLogger(HeadOfQueueTask.class);
+      private static Logger _logger = log.getLogger(HeadOfQueueTask.class);
 
       private List<TestTask> taskSet;
       private int index;
@@ -344,7 +344,7 @@ public class AbstractTaskSetTest
       @Override
       protected void checkProperExecution()
       {
-         _logger.debug("Checking for proper execution order: " + this);
+         _log.debug("Checking for proper execution order: " + this);
          synchronized (this.taskSet)
          {
 
@@ -372,7 +372,7 @@ public class AbstractTaskSetTest
          }
          if (!this.properStart)
          {
-            _logger.error("Task not started properly");
+            _log.error("Task not started properly");
          }
       }
 
@@ -402,7 +402,7 @@ public class AbstractTaskSetTest
 
    public static class OrderedTask extends TestTask
    {
-      private static Logger _logger = Logger.getLogger(HeadOfQueueTask.class);
+      private static Logger _logger = log.getLogger(HeadOfQueueTask.class);
 
       private List<TestTask> taskSet;
       private int index;
@@ -424,7 +424,7 @@ public class AbstractTaskSetTest
       @Override
       protected void checkProperExecution()
       {
-         _logger.debug("Checking for proper execution order: " + this);
+         _log.debug("Checking for proper execution order: " + this);
          synchronized (this.taskSet)
          {
             this.properStart = true;

@@ -22,8 +22,8 @@ import org.jscsi.target.scsi.cdb.Write6Cdb;
 import org.jscsi.target.scsi.cdb.WriteCdb;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.util.Debug;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class WriteStage extends ReadOrWriteStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WriteStage.class);
+    private static final Logger log = LogManager.getLogger(WriteStage.class);
 
     /**
      * The <code>DataSN</code> value the next Data-Out PDU must carry.
@@ -71,7 +71,7 @@ public final class WriteStage extends ReadOrWriteStage {
     @Override
     public void execute (ProtocolDataUnit pdu) throws IOException , DigestException , InterruptedException , InternetSCSIException , SettingsException {
 
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("Entering WRITE STAGE");
+        if (log.isDebugEnabled()) log.debug("Entering WRITE STAGE");
 
         // get relevant values from settings
         final boolean immediateData = settings.getImmediateData();
@@ -79,9 +79,9 @@ public final class WriteStage extends ReadOrWriteStage {
         final int firstBurstLength = settings.getFirstBurstLength();
         final int maxBurstLength = settings.getMaxBurstLength();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("immediateData = " + immediateData);
-            LOGGER.debug("initialR2T = " + initialR2T);
+        if (log.isDebugEnabled()) {
+            log.debug("immediateData = " + immediateData);
+            log.debug("initialR2T = " + initialR2T);
         }
 
         // get relevant values from PDU/CDB
@@ -117,8 +117,8 @@ public final class WriteStage extends ReadOrWriteStage {
              * WriteStage is simply left early (without closing the connection), the initiator may send additional
              * unsolicited Data-Out PDUs, which the jSCSI Target is currently unable to ignore or process properly.
              */
-            LOGGER.debug("illegal field in Write CDB");
-            LOGGER.debug("CDB:\n" + Debug.byteBufferToString(parser.getCDB()));
+            log.debug("illegal field in Write CDB");
+            log.debug("CDB:\n" + Debug.byteBufferToString(parser.getCDB()));
             
             // Not necessarily close the connection
 
@@ -139,13 +139,13 @@ public final class WriteStage extends ReadOrWriteStage {
             session.getStorageModule().write(immediateDataArray, storageIndex);
             bytesReceived = immediateDataArray.length;
 
-            if (LOGGER.isDebugEnabled()) LOGGER.debug("wrote " + immediateDataArray.length + "bytes as immediate data");
+            if (log.isDebugEnabled()) log.debug("wrote " + immediateDataArray.length + "bytes as immediate data");
         }
 
         // *** receive unsolicited data ***
         if (!initialR2T && !bhs.isFinalFlag()) {
 
-            if (LOGGER.isDebugEnabled()) LOGGER.debug("receiving unsolicited data");
+            if (log.isDebugEnabled()) log.debug("receiving unsolicited data");
 
             boolean firstBurstOver = false;
             while (!firstBurstOver && bytesReceived <= firstBurstLength) {
@@ -168,7 +168,7 @@ public final class WriteStage extends ReadOrWriteStage {
 
         // *** receive solicited data ***
         if (bytesReceived < transferLengthInBytes) {
-            if (LOGGER.isDebugEnabled()) LOGGER.debug(bytesReceived + "<" + transferLengthInBytes);
+            if (log.isDebugEnabled()) log.debug(bytesReceived + "<" + transferLengthInBytes);
 
             int readyToTransferSequenceNumber = 0;
             int desiredDataTransferLength;

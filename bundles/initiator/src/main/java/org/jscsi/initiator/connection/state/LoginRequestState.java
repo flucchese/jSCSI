@@ -89,7 +89,7 @@ public final class LoginRequestState extends AbstractState {
     public final void execute () throws InternetSCSIException {
 
         final SettingsMap loginParameters = connection.getSettings();
-        LOGGER.info("Sending these login parameters:\n" + loginParameters);
+        log.info("Sending these login parameters:\n" + loginParameters);
 
         final int maxRecvDataSegmentLength = connection.getSettingAsInt(OperationalTextKey.MAX_RECV_DATA_SEGMENT_LENGTH);
         final ISID isid = ISID.createRandom(System.currentTimeMillis());
@@ -123,7 +123,7 @@ public final class LoginRequestState extends AbstractState {
 
             loginRequest.setContinueFlag(continueFlag);
             loginRequest.setCurrentStageNumber(connection.getSession().getPhase());
-            LOGGER.debug("Phase:\n" + loginRequest.getCurrentStageNumber());
+            log.debug("Phase:\n" + loginRequest.getCurrentStageNumber());
             if (finalFlag) {
                 loginRequest.setNextStageNumber(nextStage);
             }

@@ -24,8 +24,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 import org.jscsi.exception.InternetSCSIException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -42,7 +42,7 @@ final class TextParameterDataSegment extends AbstractDataSegment {
     // --------------------------------------------------------------------------
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TextParameterDataSegment.class);
+    private static final Logger log = LogManager.getLogger(TextParameterDataSegment.class);
 
     /** All strings should be interpreted as this encoding. */
     private static final String DEFAULT_TEXT_ENCODING = "UTF-8";
@@ -169,8 +169,8 @@ final class TextParameterDataSegment extends AbstractDataSegment {
                 settings.add(OperationalTextKey.valueOfEx(keyValue[KEY_INDEX]), keyValue[VALUE_INDEX]);
             }
         } catch (UnsupportedEncodingException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("Unsupported Encoding: " + e.getLocalizedMessage());
+            if (log.isErrorEnabled()) {
+                log.error("Unsupported Encoding: " + e.getLocalizedMessage());
             }
 
             // exception rethrow
@@ -225,8 +225,8 @@ final class TextParameterDataSegment extends AbstractDataSegment {
                 final TextParameterDataSegment anotherTPDS = (TextParameterDataSegment) anObject;
                 return getSettings().equals(anotherTPDS.getSettings());
             } catch (Exception e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error(e.getLocalizedMessage());
+                if (log.isErrorEnabled()) {
+                    log.error(e.getLocalizedMessage());
                 }
             }
         }

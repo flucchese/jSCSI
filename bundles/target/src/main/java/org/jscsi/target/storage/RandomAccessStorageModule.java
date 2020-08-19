@@ -10,8 +10,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.channels.FileChannel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RandomAccessStorageModule implements IStorageModule {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RandomAccessStorageModule.class);
+    private static final Logger log = LogManager.getLogger(RandomAccessStorageModule.class);
 
     private static final int VIRTUAL_BLOCK_SIZE = 512;
 
@@ -156,10 +156,10 @@ public class RandomAccessStorageModule implements IStorageModule {
             // if file exists, remove it after questioning.
             if (pToCreate.exists()) {
                 if (!pToCreate.delete()) {
-                    LOGGER.debug("Removal of old storage " + pToCreate.toString() + " unsucessful.");
+                    log.debug("Removal of old storage " + pToCreate.toString() + " unsucessful.");
                     return false;
                 }
-                LOGGER.debug("Removal of old storage " + pToCreate.toString() + " sucessful.");
+                log.debug("Removal of old storage " + pToCreate.toString() + " sucessful.");
             }
 
             // create file
@@ -172,17 +172,17 @@ public class RandomAccessStorageModule implements IStorageModule {
             fcout.position(pLength);
             outStream.write(26); // Write EOF (not normally needed)
             fcout.force(true);
-            LOGGER.debug("Creation of storage " + pToCreate.toString() + " sucessful.");
+            log.debug("Creation of storage " + pToCreate.toString() + " sucessful.");
             return true;
         } catch (IOException e) {
-            LOGGER.error("Exception creating storage volume " + pToCreate.getAbsolutePath() + ": " + e.getMessage(), e);
+            log.error("Exception creating storage volume " + pToCreate.getAbsolutePath() + ": " + e.getMessage(), e);
             throw e;
         } finally {
             if (outStream != null) {
                 try {
                     outStream.close();
                 } catch (IOException e) {
-                    LOGGER.error("Exception closing storage volume: " + e.getMessage(), e);
+                    log.error("Exception closing storage volume: " + e.getMessage(), e);
                 }
             }
         }

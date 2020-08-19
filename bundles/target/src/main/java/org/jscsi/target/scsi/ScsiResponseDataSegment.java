@@ -7,8 +7,8 @@ import org.jscsi.target.connection.TargetPduFactory;
 import org.jscsi.target.scsi.sense.SenseData;
 import org.jscsi.target.util.Debug;
 import org.jscsi.target.util.ReadWrite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ScsiResponseDataSegment {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScsiResponseDataSegment.class);
+    private static final Logger log = LogManager.getLogger(ScsiResponseDataSegment.class);
 
     /**
      * A {@link ScsiResponseDataSegment} of length zero.
@@ -147,7 +147,7 @@ public final class ScsiResponseDataSegment {
             return croppedBuffer;
         }
 
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("SCSI Response Data Segment:\n" + Debug.byteBufferToString(buffer));
+        if (log.isDebugEnabled()) log.debug("SCSI Response Data Segment:\n" + Debug.byteBufferToString(buffer));
 
         return buffer;
     }

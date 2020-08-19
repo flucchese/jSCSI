@@ -92,12 +92,12 @@ public final class LoginResponseState extends AbstractState {
         connection.setExpectedStatusSequenceNumber(parser.getStatusSequenceNumber() + 1);// TODO was +2
 
         // check parameters....
-        LOGGER.info("Retrieving these login parameters:\n" + loginResponse.getSettings());
+        log.info("Retrieving these login parameters:\n" + loginResponse.getSettings());
 
         connection.update(loginResponse.getSettings());
 
-        LOGGER.info("Updated settings to these:\n" + connection.getSettings());
-        LOGGER.info("Nextstage is : " + nextStage);
+        log.info("Updated settings to these:\n" + connection.getSettings());
+        log.info("Nextstage is : " + nextStage);
 
         // is a transit to the next stage possible
         if (protocolDataUnit.getBasicHeaderSegment().isFinalFlag()) {

@@ -29,8 +29,8 @@ import java.util.concurrent.Future;
 import org.jscsi.exception.NoSuchSessionException;
 import org.jscsi.exception.TaskExecutionException;
 import org.jscsi.initiator.connection.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -47,7 +47,7 @@ public final class Initiator {
     // --------------------------------------------------------------------------
 
     /** The Logger interface. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Initiator.class);
+    private static final Logger log = LogManager.getLogger(Initiator.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
@@ -100,7 +100,7 @@ public final class Initiator {
 
         final Session session = factory.getSession(configuration, targetName, targetAddress);
         sessions.put(session.getTargetName(), session);
-        LOGGER.info("Created the session with iSCSI Target '" + targetName + "' at " + targetAddress.getHostName() + " on port " + targetAddress.getPort() + ".");
+        log.info("Created the session with iSCSI Target '" + targetName + "' at " + targetAddress.getHostName() + " on port " + targetAddress.getPort() + ".");
     }
 
     /**
@@ -116,7 +116,7 @@ public final class Initiator {
         // TODO Test the removal from the map.
         sessions.remove(targetName);
 
-        LOGGER.info("Closed the session to the iSCSI Target '" + targetName + "'.");
+        log.info("Closed the session to the iSCSI Target '" + targetName + "'.");
     }
 
     // --------------------------------------------------------------------------

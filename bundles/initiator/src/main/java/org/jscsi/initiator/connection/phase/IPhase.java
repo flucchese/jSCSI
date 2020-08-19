@@ -25,8 +25,8 @@ import org.jscsi.initiator.connection.ITask;
 import org.jscsi.initiator.connection.Session;
 import org.jscsi.initiator.connection.TargetCapacityInformations;
 import org.jscsi.parser.login.LoginStage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -133,7 +133,7 @@ abstract class AbstractPhase implements IPhase {
     // --------------------------------------------------------------------------
 
     /** The Logger interface. */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractPhase.class);
+    protected static final Logger log = LogManager.getLogger(AbstractPhase.class);
 
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------

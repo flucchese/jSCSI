@@ -90,7 +90,7 @@ import org.junit.BeforeClass;
 
 public class BufferTestTask implements TargetTransportPort
 {
-   private static Logger _logger = Logger.getLogger(BufferTestTask.class);
+   private static Logger _logger = log.getLogger(BufferTestTask.class);
 
    static final int STORE_CAPACITY = 1024 * 1024 * 4; // 4MB
    static final int STORE_BLOCK_SIZE = 4096;
@@ -111,7 +111,7 @@ public class BufferTestTask implements TargetTransportPort
    @BeforeClass
    public static void setUpBeforeClass() throws Exception
    {
-      _logger.debug("configuring test class");
+      _log.debug("configuring test class");
 
       new File("test-output").mkdir();
 
@@ -138,10 +138,10 @@ public class BufferTestTask implements TargetTransportPort
    @AfterClass
    public static void tearDownAfterClass() throws Exception
    {
-      _logger.debug("flushing file buffer to backing store");
+      _log.debug("flushing file buffer to backing store");
       ((MappedByteBuffer) fileBuf).force();
 
-      _logger.debug("closing file buffer backing store");
+      _log.debug("closing file buffer backing store");
       file.close();
    }
 
@@ -161,7 +161,7 @@ public class BufferTestTask implements TargetTransportPort
    public boolean readData(Nexus nexus, long commandReferenceNumber, ByteBuffer output)
          throws InterruptedException
    {
-      _logger.debug("servicing readData request: nexus: " + nexus + ", cmdRef: "
+      _log.debug("servicing readData request: nexus: " + nexus + ", cmdRef: "
             + commandReferenceNumber);
       ByteBuffer data = this.readDataMap.get(commandReferenceNumber);
       data.rewind();
@@ -172,7 +172,7 @@ public class BufferTestTask implements TargetTransportPort
    public boolean writeData(Nexus nexus, long commandReferenceNumber, ByteBuffer input)
          throws InterruptedException
    {
-      _logger.debug("servicing writeData request");
+      _log.debug("servicing writeData request");
 
       ByteBuffer copy = ByteBuffer.allocate(input.limit());
       copy.put(input);
@@ -184,17 +184,17 @@ public class BufferTestTask implements TargetTransportPort
 
    public void registerTarget(Target target)
    {
-      _logger.debug("servicing registerTarget request");
+      _log.debug("servicing registerTarget request");
    }
 
    public void removeTarget(String targetName) throws Exception
    {
-      _logger.debug("servicing removeTarget request");
+      _log.debug("servicing removeTarget request");
    }
 
    public void terminateDataTransfer(Nexus nexus, long commandReferenceNumber)
    {
-      _logger.debug("servicing terminateDataTransfer request");
+      _log.debug("servicing terminateDataTransfer request");
    }
 
    public void writeResponse(
@@ -203,9 +203,9 @@ public class BufferTestTask implements TargetTransportPort
          Status status,
          ByteBuffer senseData)
    {
-      _logger.debug("servicing writeResponse request: nexus: " + nexus + ", cmdRef: "
+      _log.debug("servicing writeResponse request: nexus: " + nexus + ", cmdRef: "
             + commandReferenceNumber);
-      _logger.debug("response was status: " + status);
+      _log.debug("response was status: " + status);
    }
 
    /////////////////////////////////////////////////////////////////////////////
@@ -285,7 +285,7 @@ public class BufferTestTask implements TargetTransportPort
 
       try
       {
-         _logger.debug("running memory buffer task");
+         _log.debug("running memory buffer task");
          Task task = this.getMemoryTask(this, cmd);
          task.run();
       }
@@ -306,7 +306,7 @@ public class BufferTestTask implements TargetTransportPort
       {
          Task task = this.getFileTask(this, cmd);
 
-         _logger.debug("running file buffer task");
+         _log.debug("running file buffer task");
          task = this.getFileTask(this, cmd);
 
          task.run();

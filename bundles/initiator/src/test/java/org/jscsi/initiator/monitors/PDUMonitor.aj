@@ -46,8 +46,8 @@ import org.jscsi.parser.text.TextResponseParser;
 import org.jscsi.parser.tmf.TaskManagementFunctionRequestParser;
 import org.jscsi.parser.tmf.TaskManagementFunctionResponseParser;
 import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * This aspect is used to monitor pdu's when they are written and read.
@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 public aspect PDUMonitor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger("PDUMonitor");
+	private static final Logger log = LogManager.getLogger("PDUMonitor");
 
 	/**
 	 * Point cutting the read function on PDUs to have a closer look at reading
@@ -80,11 +80,11 @@ public aspect PDUMonitor {
 		call(* ProtocolDataUnit.write(SocketChannel)) && target(p) && args(c);
 
 	before(ProtocolDataUnit p, SocketChannel c) : read(p, c){
-		LOGGER.debug("Reading PDU.");
+		log.debug("Reading PDU.");
 	}
 
 	after(ProtocolDataUnit p, SocketChannel c) : read(p, c){
-		LOGGER.info("Read PDU: " + p);
+		log.info("Read PDU: " + p);
 
 		/**
 		 * Assertions on read in PDUs This can only happen when a request went
@@ -147,7 +147,7 @@ public aspect PDUMonitor {
 	}
 
 	before(ProtocolDataUnit p, SocketChannel c) : write(p, c){
-		LOGGER.debug("Writing to PDU: " + p);
+		log.debug("Writing to PDU: " + p);
 	}
 
 }

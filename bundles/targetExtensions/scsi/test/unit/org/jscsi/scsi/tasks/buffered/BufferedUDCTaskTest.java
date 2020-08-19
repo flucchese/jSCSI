@@ -79,7 +79,7 @@ import org.junit.Test;
 
 public class BufferedUDCTaskTest extends BufferTestTask
 {
-   private static Logger _logger = Logger.getLogger(BufferedUDCTaskTest.class);
+   private static Logger _logger = log.getLogger(BufferedUDCTaskTest.class);
 
    private static final int MIN_BLOCKS = 5;
 
@@ -135,7 +135,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performWrite6(int lba, int numBlocks, ByteBuffer data)
    {
-      _logger.debug("********** WRITE6 MEMORY **********");
+      _log.debug("********** WRITE6 MEMORY **********");
       CDB cdb = new Write6(false, true, lba, numBlocks);
       this.addReadData(numBlocks * STORE_BLOCK_SIZE, cmdRef, data);
       this.submitMemoryTask(cdb, cmdRef);
@@ -145,7 +145,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performWrite10(int lba, int numBlocks, ByteBuffer data)
    {
-      _logger.debug("********** WRITE10 MEMORY **********");
+      _log.debug("********** WRITE10 MEMORY **********");
       CDB cdb = new Write10(0, false, false, false, false, false, lba, numBlocks);
       this.addReadData(numBlocks * STORE_BLOCK_SIZE, cmdRef, data);
       this.submitMemoryTask(cdb, cmdRef);
@@ -155,7 +155,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performWrite12(int lba, int numBlocks, ByteBuffer data)
    {
-      _logger.debug("********** WRITE12 MEMORY **********");
+      _log.debug("********** WRITE12 MEMORY **********");
       CDB cdb = new Write12(0, false, false, false, false, false, lba, numBlocks);
       this.addReadData(numBlocks * STORE_BLOCK_SIZE, cmdRef, data);
       this.submitMemoryTask(cdb, cmdRef);
@@ -165,7 +165,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performWrite16(int lba, int numBlocks, ByteBuffer data)
    {
-      _logger.debug("********** WRITE16 MEMORY **********");
+      _log.debug("********** WRITE16 MEMORY **********");
       CDB cdb = new Write16(0, false, false, false, false, false, lba, numBlocks);
       this.addReadData(numBlocks * STORE_BLOCK_SIZE, cmdRef, data);
       this.submitMemoryTask(cdb, cmdRef);
@@ -175,7 +175,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performRead6(int lba, int numBlocks, ByteBuffer expectedData)
    {
-      _logger.debug("********** READ6 MEMORY **********");
+      _log.debug("********** READ6 MEMORY **********");
       CDB cdb = new Read6(false, true, lba, numBlocks);
       this.submitMemoryTask(cdb, cmdRef);
       verifyInputBuffer(numBlocks, expectedData);
@@ -185,7 +185,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performRead10(int lba, int numBlocks, ByteBuffer expectedData)
    {
-      _logger.debug("********** READ10 MEMORY **********");
+      _log.debug("********** READ10 MEMORY **********");
       CDB cdb = new Read10(0, false, false, false, false, false, lba, numBlocks);
       this.submitMemoryTask(cdb, cmdRef);
       verifyInputBuffer(numBlocks, expectedData);
@@ -195,7 +195,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performRead12(int lba, int numBlocks, ByteBuffer expectedData)
    {
-      _logger.debug("********** READ12 MEMORY **********");
+      _log.debug("********** READ12 MEMORY **********");
       CDB cdb = new Read12(0, false, false, false, false, false, lba, numBlocks);
       this.submitMemoryTask(cdb, cmdRef);
       verifyInputBuffer(numBlocks, expectedData);
@@ -205,7 +205,7 @@ public class BufferedUDCTaskTest extends BufferTestTask
 
    private void performRead16(int lba, int numBlocks, ByteBuffer expectedData)
    {
-      _logger.debug("********** READ16 MEMORY **********");
+      _log.debug("********** READ16 MEMORY **********");
       CDB cdb = new Read16(0, false, false, false, false, false, lba, numBlocks);
       this.submitMemoryTask(cdb, cmdRef);
       verifyInputBuffer(numBlocks, expectedData);

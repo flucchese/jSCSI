@@ -15,8 +15,8 @@ import org.jscsi.target.connection.phase.TargetLoginPhase;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.settings.TextKeyword;
 import org.jscsi.target.settings.TextParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 
 /**
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class SecurityNegotiationStage extends TargetLoginStage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityNegotiationStage.class);
+    private static final Logger log = LogManager.getLogger(SecurityNegotiationStage.class);
 
     /**
      * The constructor.
@@ -59,12 +59,12 @@ public final class SecurityNegotiationStage extends TargetLoginStage {
             final List<String> authMethodKeyValuePairs = new Vector<>();
 
             // log initiator's key-value pairs
-            if (LOGGER.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 final StringBuilder sb = new StringBuilder();
                 sb.append("request key value pairs:\n");
                 for (String s : requestKeyValuePairs)
                     sb.append("   " + s + "\n");
-                LOGGER.debug(sb.toString());
+                log.debug(sb.toString());
             }
 
             // extract available AuthMethod key-value pair, so that settings can
@@ -126,7 +126,7 @@ public final class SecurityNegotiationStage extends TargetLoginStage {
                     // concatenate key value pairs to single string
                     final String responseString = TextParameter.concatenateKeyValuePairs(responseKeyValuePairs);
 
-                    if (LOGGER.isDebugEnabled()) LOGGER.debug("response: " + responseString);
+                    if (log.isDebugEnabled()) log.debug("response: " + responseString);
 
                     // send reply (sequence), set transit bit of last PDU
                     sendPduSequence(responseString, requestedNextStageNumber);
@@ -139,7 +139,7 @@ public final class SecurityNegotiationStage extends TargetLoginStage {
                 } else {
                     // TODO support CHAP (and use String
                     // authMethodKeyValuePairs)
-                    LOGGER.error("initiator attempted CHAP authentication");
+                    log.error("initiator attempted CHAP authentication");
                     // nextStageNumber = null;//no change
                     return;
                 }

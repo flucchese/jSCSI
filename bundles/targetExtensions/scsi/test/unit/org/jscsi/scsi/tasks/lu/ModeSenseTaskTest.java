@@ -96,13 +96,13 @@ import org.junit.Test;
 //TODO: Describe class or interface
 public class ModeSenseTaskTest
 {
-   private static Logger _logger = Logger.getLogger(ModeSenseTaskTest.class);
+   private static Logger _logger = log.getLogger(ModeSenseTaskTest.class);
 
    public static class ModeSenseException extends Exception
    {
       private static final long serialVersionUID = -7600550897640999759L;
 
-      private static Logger _logger = Logger.getLogger(ModeSenseException.class);
+      private static Logger _logger = log.getLogger(ModeSenseException.class);
 
       private Status status;
       private ByteBuffer senseData;
@@ -110,7 +110,7 @@ public class ModeSenseTaskTest
       public ModeSenseException(Status status, ByteBuffer senseData)
       {
          super("ModeSenseTask returned bad status: " + status.name());
-         _logger.error("ModeSenseTask returned bad status: " + status.name());
+         _log.error("ModeSenseTask returned bad status: " + status.name());
          this.status = status;
          this.senseData = senseData;
       }
@@ -118,7 +118,7 @@ public class ModeSenseTaskTest
       public ModeSenseException(String message)
       {
          super(message);
-         _logger.error(message);
+         _log.error(message);
          status = null;
          senseData = null;
       }
@@ -165,9 +165,9 @@ public class ModeSenseTaskTest
             new Command(new Nexus("initiator", "target", 0, 0), cdb, TaskAttribute.SIMPLE, 0, 0);
       InquiryDataRegistry inqreg = new StaticInquiryDataRegistry();
 
-      _logger.debug("Creating ModeSenseTask from MODE SENSE (6) command");
+      _log.debug("Creating ModeSenseTask from MODE SENSE (6) command");
       Task task = new ModeSenseTask(port, command, registry, inqreg);
-      _logger.debug("Running mode sense task");
+      _log.debug("Running mode sense task");
       task.run();
 
       if (port.getLastStatus() != Status.GOOD)
