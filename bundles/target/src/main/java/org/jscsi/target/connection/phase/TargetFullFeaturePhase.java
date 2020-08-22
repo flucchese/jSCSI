@@ -6,8 +6,11 @@ import java.security.DigestException;
 
 import javax.naming.OperationNotSupportedException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.BasicHeaderSegment;
+import org.jscsi.parser.OperationCode;
 import org.jscsi.parser.ProtocolDataUnit;
 import org.jscsi.parser.scsi.SCSICommandParser;
 import org.jscsi.target.connection.Connection;
@@ -29,8 +32,6 @@ import org.jscsi.target.connection.stage.fullfeature.UnsupportedOpCodeStage;
 import org.jscsi.target.connection.stage.fullfeature.WriteStage;
 import org.jscsi.target.scsi.cdb.ScsiOperationCode;
 import org.jscsi.target.settings.SettingsException;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 
 /**
@@ -80,93 +81,103 @@ public final class TargetFullFeaturePhase extends TargetPhase {
         running = true;
         while (running) {
             ProtocolDataUnit pdu = connection.receivePdu();
+            
+            if (pdu == null) {
+            	log.debug("Received an empty pdu. Bailing out...");
+            	return false;
+            }
+
             BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
+            OperationCode opCode = bhs.getOpCode();
+            
+            if (opCode == null) {
+                log.error("Received null opcode");
+                stage = new UnsupportedOpCodeStage(this);
+            } else {
+                // identify desired stage
+                switch (opCode) {
+                    case SCSI_COMMAND :
+                        if (connection.getTargetSession().isNormalSession()) {
+                            final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
+                            ScsiOperationCode scsiOpCode = ScsiOperationCode.valueOf(parser.getCDB().get(0));
 
-            // identify desired stage
-            switch (bhs.getOpCode()) {
+                            log.debug("scsiOpCode = " + scsiOpCode);// log SCSI
+                                                                       // Operation Code
 
-                case SCSI_COMMAND :
-                    if (connection.getTargetSession().isNormalSession()) {
-                        final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
-                        ScsiOperationCode scsiOpCode = ScsiOperationCode.valueOf(parser.getCDB().get(0));
-
-                        log.debug("scsiOpCode = " + scsiOpCode);// log SCSI
-                                                                   // Operation Code
-
-                        if (scsiOpCode != null) {
-                            switch (scsiOpCode) {
-                                case TEST_UNIT_READY :
-                                    stage = new TestUnitReadyStage(this);
-                                    break;
-                                case REQUEST_SENSE :
-                                    stage = new RequestSenseStage(this);
-                                    break;
-                                case FORMAT_UNIT :
-                                    stage = new FormatUnitStage(this);
-                                    break;
-                                case INQUIRY :
-                                    stage = new InquiryStage(this);
-                                    break;
-                                case MODE_SELECT_6 :
-                                    stage = null;
-                                    scsiOpCode = null;
-                                    break;
-                                case MODE_SENSE_6 :
-                                    stage = new ModeSenseStage(this);
-                                    if (!((ModeSenseStage) stage).canHandle(pdu)) {
+                            if (scsiOpCode != null) {
+                                switch (scsiOpCode) {
+                                    case TEST_UNIT_READY :
+                                        stage = new TestUnitReadyStage(this);
+                                        break;
+                                    case REQUEST_SENSE :
+                                        stage = new RequestSenseStage(this);
+                                        break;
+                                    case FORMAT_UNIT :
+                                        stage = new FormatUnitStage(this);
+                                        break;
+                                    case INQUIRY :
+                                        stage = new InquiryStage(this);
+                                        break;
+                                    case MODE_SELECT_6 :
                                         stage = null;
                                         scsiOpCode = null;
-                                    }
-                                    break;
-                                case SEND_DIAGNOSTIC :
-                                    stage = new SendDiagnosticStage(this);
-                                    break;
-                                case READ_CAPACITY_10 :// use common read capacity stage
-                                case READ_CAPACITY_16 :
-                                    stage = new ReadCapacityStage(this);
-                                    break;
-                                case WRITE_6 :// use common write stage
-                                case WRITE_10 :
-                                    stage = new WriteStage(this);
-                                    break;
-                                case READ_6 :// use common read stage
-                                case READ_10 :
-                                    stage = new ReadStage(this);
-                                    break;
-                                case REPORT_LUNS :
-                                    stage = new ReportLunsStage(this);
-                                    break;
-                                default :
-                                    scsiOpCode = null;
+                                        break;
+                                    case MODE_SENSE_6 :
+                                        stage = new ModeSenseStage(this);
+                                        if (!((ModeSenseStage) stage).canHandle(pdu)) {
+                                            stage = null;
+                                            scsiOpCode = null;
+                                        }
+                                        break;
+                                    case SEND_DIAGNOSTIC :
+                                        stage = new SendDiagnosticStage(this);
+                                        break;
+                                    case READ_CAPACITY_10 :// use common read capacity stage
+                                    case READ_CAPACITY_16 :
+                                        stage = new ReadCapacityStage(this);
+                                        break;
+                                    case WRITE_6 :// use common write stage
+                                    case WRITE_10 :
+                                        stage = new WriteStage(this);
+                                        break;
+                                    case READ_6 :// use common read stage
+                                    case READ_10 :
+                                        stage = new ReadStage(this);
+                                        break;
+                                    case REPORT_LUNS :
+                                        stage = new ReportLunsStage(this);
+                                        break;
+                                    default :
+                                        scsiOpCode = null;
 
+                                }
+                            }// else, or if default block was entered (programmer error)
+                            if (scsiOpCode == null) {
+                                log.error("Unsupported SCSI OpCode 0x" + Integer.toHexString(parser.getCDB().get(0) & 255) + " in SCSI Command PDU.");
+                                stage = new UnsupportedOpCodeStage(this);
                             }
-                        }// else, or if default block was entered (programmer error)
-                        if (scsiOpCode == null) {
-                            log.error("Unsupported SCSI OpCode 0x" + Integer.toHexString(parser.getCDB().get(0) & 255) + " in SCSI Command PDU.");
-                            stage = new UnsupportedOpCodeStage(this);
+
+                        } else {// session is discovery session
+                            throw new InternetSCSIException("received SCSI command in discovery session");
                         }
-
-                    } else {// session is discovery session
-                        throw new InternetSCSIException("received SCSI command in discovery session");
-                    }
-                    break; // SCSI_COMMAND
-
-                case SCSI_TM_REQUEST :
-                    stage = new TMStage(this);
-                    break;
-                case NOP_OUT :
-                    stage = new PingStage(this);
-                    break;
-                case TEXT_REQUEST :
-                    stage = new TextNegotiationStage(this);
-                    break;
-                case LOGOUT_REQUEST :
-                    stage = new LogoutStage(this);
-                    running = false;
-                    break;
-                default :
-                    log.error("Received unsupported opcode for " + pdu.getBasicHeaderSegment().getOpCode());
-                    stage = new UnsupportedOpCodeStage(this);
+                        break; // SCSI_COMMAND
+                    case SCSI_TM_REQUEST :
+                        stage = new TMStage(this);
+                        break;
+                    case NOP_OUT :
+                        stage = new PingStage(this);
+                        break;
+                    case TEXT_REQUEST :
+                        stage = new TextNegotiationStage(this);
+                        break;
+                    case LOGOUT_REQUEST :
+                        stage = new LogoutStage(this);
+                        running = false;
+                        break;
+                    default :
+                        log.error("Received unsupported opcode for " + opCode);
+                        stage = new UnsupportedOpCodeStage(this);
+                }
             }
 
             // process the PDU

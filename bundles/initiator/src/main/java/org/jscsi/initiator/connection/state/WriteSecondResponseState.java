@@ -78,15 +78,19 @@ public final class WriteSecondResponseState extends AbstractState {
     public final void execute () throws InternetSCSIException {
 
         final ProtocolDataUnit protocolDataUnit = connection.receive();
+        
+        if (protocolDataUnit == null) {
+        	log.debug("Received an empty pdu. Bailing out...");
+        	return;
+        }
+
         log.trace("1" + protocolDataUnit);
         if (protocolDataUnit.getBasicHeaderSegment().getParser() instanceof Ready2TransferParser) {
             log.trace("2");
             final Ready2TransferParser parser = (Ready2TransferParser) protocolDataUnit.getBasicHeaderSegment().getParser();
 
             final int targetTransferTag = parser.getTargetTransferTag();
-            if (log.isDebugEnabled()) {
-                log.debug("R2T has TTT set to " + targetTransferTag);
-            }
+            log.debug("R2T has TTT set to " + targetTransferTag);
 
             final int desiredDataTransferLength = parser.getDesiredDataTransferLength();
             if (desiredDataTransferLength > connection.getSettingAsInt(OperationalTextKey.MAX_BURST_LENGTH)) {
@@ -98,14 +102,12 @@ public final class WriteSecondResponseState extends AbstractState {
 
             connection.nextState(new WriteSecondBurstState(connection, iterator, targetTransferTag, desiredDataTransferLength, dataSequenceNumber, bufferOffset));
             super.stateFollowing = true;
-            // return true;
             return;
         } else if (protocolDataUnit.getBasicHeaderSegment().getParser() instanceof SCSIResponseParser) {
             final SCSIResponseParser parser = (SCSIResponseParser) protocolDataUnit.getBasicHeaderSegment().getParser();
 
             if (!iterator.hasNext() && parser.getStatus() == SCSIStatus.GOOD) {
                 connection.getSession().incrementInitiatorTaskTag();
-                // return false;
                 super.stateFollowing = false;
                 return;
             }

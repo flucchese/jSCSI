@@ -70,6 +70,11 @@ public final class CapacityResponseState extends AbstractState {
 
         final ProtocolDataUnit protocolDataUnit = connection.receive();
 
+        if (protocolDataUnit == null) {
+        	log.debug("Received an empty pdu. Bailing out...");
+        	return;
+        }
+        
         // first, we extract capacity informations
         if (!(protocolDataUnit.getBasicHeaderSegment().getParser() instanceof DataInParser)) {
 
@@ -105,12 +110,5 @@ public final class CapacityResponseState extends AbstractState {
             }
             throw new InternetSCSIException("Error: Task did not finish successfully.");
         }
-
     }
-
-    // --------------------------------------------------------------------------
-    // --------------------------------------------------------------------------
-    // --------------------------------------------------------------------------
-    // --------------------------------------------------------------------------
-
 }

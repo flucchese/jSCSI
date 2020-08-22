@@ -147,7 +147,7 @@ public final class ScsiResponseDataSegment {
             return croppedBuffer;
         }
 
-        if (log.isDebugEnabled()) log.debug("SCSI Response Data Segment:\n" + Debug.byteBufferToString(buffer));
+        log.debug("SCSI Response Data Segment:\n" + Debug.byteBufferToString(buffer));
 
         return buffer;
     }

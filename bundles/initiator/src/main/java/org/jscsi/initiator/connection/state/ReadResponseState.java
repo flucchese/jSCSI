@@ -91,13 +91,17 @@ public final class ReadResponseState extends AbstractState {
 
         do {
             protocolDataUnit = connection.receive();
+            
+            if (protocolDataUnit == null) {
+            	log.debug("Received an empty pdu. Bailing out...");
+            	return;
+            }
+
             boolean dataWasRead = false;
             if (protocolDataUnit.getBasicHeaderSegment().getParser() instanceof DataInParser) {
                 final DataInParser parser = (DataInParser) protocolDataUnit.getBasicHeaderSegment().getParser();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Remaining, DataSegmentLength: " + buffer.remaining() + ", " + protocolDataUnit.getBasicHeaderSegment().getDataSegmentLength());
-                }
+                log.debug("Remaining, DataSegmentLength: " + buffer.remaining() + ", " + protocolDataUnit.getBasicHeaderSegment().getDataSegmentLength());
 
                 final ByteBuffer dataSegment = protocolDataUnit.getDataSegment();
                 while (buffer.hasRemaining() && dataSegment.hasRemaining()) {
@@ -120,15 +124,12 @@ public final class ReadResponseState extends AbstractState {
             }
         } while (!protocolDataUnit.getBasicHeaderSegment().isFinalFlag());
 
-        if (connection.getSettingAsBoolean(OperationalTextKey.IMMEDIATE_DATA)) {
-            return;
-        } else {
+        if (!connection.getSettingAsBoolean(OperationalTextKey.IMMEDIATE_DATA)) {
             protocolDataUnit = connection.receive();
             if (protocolDataUnit.getBasicHeaderSegment().getParser() instanceof SCSIResponseParser) {
                 readHandleImmediateData(protocolDataUnit);
             }
         }
-
     }
 
     private void readHandleImmediateData (final ProtocolDataUnit protocolDataUnit) throws InternetSCSIException {

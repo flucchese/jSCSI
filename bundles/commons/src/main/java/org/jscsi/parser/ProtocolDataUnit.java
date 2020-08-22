@@ -344,7 +344,7 @@ public final class ProtocolDataUnit {
      * @throws InternetSCSIException if any violation of the iSCSI-Standard emerge.
      * @throws DigestException if a mismatch of the digest exists.
      */
-    public final int read (final SocketChannel sChannel) throws InternetSCSIException , IOException , DigestException {
+    public final boolean read (final SocketChannel sChannel) throws InternetSCSIException, DigestException, IOException {
 
         // read Basic Header Segment first to determine the total length of this
         // Protocol Data Unit.
@@ -354,11 +354,8 @@ public final class ProtocolDataUnit {
         int len = 0;
         while (len < BasicHeaderSegment.BHS_FIXED_SIZE) {
             int lens = sChannel.read(bhs);
-            if (lens == -1) {
-                // The Channel was closed at the Target (e.g. the Target does
-                // not support Multiple Connections)
-                // throw new ClosedChannelException();
-                return lens;
+            if (lens <= 0) {
+                return false;
             }
             len += lens;
             log.trace("Receiving through SocketChannel: " + len + " of maximal " + BasicHeaderSegment.BHS_FIXED_SIZE);
@@ -375,7 +372,6 @@ public final class ProtocolDataUnit {
             while (ahsLength < getBasicHeaderSegment().getTotalAHSLength()) {
                 ahsLength += sChannel.read(ahs);
             }
-            len += ahsLength;
             ahs.flip();
 
             deserializeAdditionalHeaderSegments(ahs);
@@ -386,7 +382,6 @@ public final class ProtocolDataUnit {
             while (dataSegmentLength < basicHeaderSegment.getDataSegmentLength()) {
                 dataSegmentLength += sChannel.read(dataSegment);
             }
-            len += dataSegmentLength;
             dataSegment.flip();
         }
 
@@ -394,15 +389,14 @@ public final class ProtocolDataUnit {
         if (log.isTraceEnabled()) {
             log.trace(basicHeaderSegment.getParser().getShortInfo());
         }
-
-        return len;
+        
+        return true;
     }
 
     /**
      * Clears all stored content of this ProtocolDataUnit object.
      */
     public final void clear () {
-
         basicHeaderSegment.clear();
 
         headerDigest.reset();

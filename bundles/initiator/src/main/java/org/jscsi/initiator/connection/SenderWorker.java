@@ -116,42 +116,40 @@ public final class SenderWorker {
 
         final ProtocolDataUnit protocolDataUnit = protocolDataUnitFactory.create(connection.getSetting(OperationalTextKey.HEADER_DIGEST), connection.getSetting(OperationalTextKey.DATA_DIGEST));
 
-        try {
-            protocolDataUnit.read(socketChannel);
-        } catch (ClosedChannelException e) {
-            throw new InternetSCSIException(e);
-        }
+        if (protocolDataUnit.read(socketChannel)) {
+            log.debug("Receiving this PDU: " + protocolDataUnit);
 
-        log.debug("Receiving this PDU: " + protocolDataUnit);
+            final Exception isCorrect = connection.getState().isCorrect(protocolDataUnit);
+            if (isCorrect == null) {
+                log.trace("Adding PDU to Receiving Queue.");
 
-        final Exception isCorrect = connection.getState().isCorrect(protocolDataUnit);
-        if (isCorrect == null) {
-            log.trace("Adding PDU to Receiving Queue.");
+                final TargetMessageParser parser = (TargetMessageParser) protocolDataUnit.getBasicHeaderSegment().getParser();
+                final Session session = connection.getSession();
 
-            final TargetMessageParser parser = (TargetMessageParser) protocolDataUnit.getBasicHeaderSegment().getParser();
-            final Session session = connection.getSession();
-
-            // the PDU maxCmdSN is greater than the local maxCmdSN, so we
-            // have to update the local one
-            if (session.getMaximumCommandSequenceNumber().compareTo(parser.getMaximumCommandSequenceNumber()) < 0) {
-                session.setMaximumCommandSequenceNumber(parser.getMaximumCommandSequenceNumber());
-            }
-
-            // the PDU expCmdSN is greater than the local expCmdSN, so we
-            // have to update the local one
-            if (parser.incrementSequenceNumber()) {
-                if (connection.getExpectedStatusSequenceNumber().compareTo(parser.getStatusSequenceNumber()) >= 0) {
-                    connection.incrementExpectedStatusSequenceNumber();
-                } else {
-                    log.error("Status Sequence Number Mismatch (received, expected): " + parser.getStatusSequenceNumber() + ", " + (connection.getExpectedStatusSequenceNumber().getValue() - 1));
+                // the PDU maxCmdSN is greater than the local maxCmdSN, so we
+                // have to update the local one
+                if (session.getMaximumCommandSequenceNumber().compareTo(parser.getMaximumCommandSequenceNumber()) < 0) {
+                    session.setMaximumCommandSequenceNumber(parser.getMaximumCommandSequenceNumber());
                 }
 
+                // the PDU expCmdSN is greater than the local expCmdSN, so we
+                // have to update the local one
+                if (parser.incrementSequenceNumber()) {
+                    if (connection.getExpectedStatusSequenceNumber().compareTo(parser.getStatusSequenceNumber()) >= 0) {
+                        connection.incrementExpectedStatusSequenceNumber();
+                    } else {
+                        log.error("Status Sequence Number Mismatch (received, expected): " + parser.getStatusSequenceNumber() + ", " + (connection.getExpectedStatusSequenceNumber().getValue() - 1));
+                    }
+
+                }
+            } else {
+                throw new InternetSCSIException(isCorrect);
             }
 
-        } else {
-            throw new InternetSCSIException(isCorrect);
+            return protocolDataUnit;
         }
-        return protocolDataUnit;
+        
+        return null;
     }
 
     // --------------------------------------------------------------------------

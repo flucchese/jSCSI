@@ -71,7 +71,7 @@ public final class WriteStage extends ReadOrWriteStage {
     @Override
     public void execute (ProtocolDataUnit pdu) throws IOException , DigestException , InterruptedException , InternetSCSIException , SettingsException {
 
-        if (log.isDebugEnabled()) log.debug("Entering WRITE STAGE");
+        log.debug("Entering WRITE STAGE");
 
         // get relevant values from settings
         final boolean immediateData = settings.getImmediateData();
@@ -79,10 +79,8 @@ public final class WriteStage extends ReadOrWriteStage {
         final int firstBurstLength = settings.getFirstBurstLength();
         final int maxBurstLength = settings.getMaxBurstLength();
 
-        if (log.isDebugEnabled()) {
-            log.debug("immediateData = " + immediateData);
-            log.debug("initialR2T = " + initialR2T);
-        }
+        log.debug("immediateData = " + immediateData);
+        log.debug("initialR2T = " + initialR2T);
 
         // get relevant values from PDU/CDB
         BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
@@ -139,13 +137,13 @@ public final class WriteStage extends ReadOrWriteStage {
             session.getStorageModule().write(immediateDataArray, storageIndex);
             bytesReceived = immediateDataArray.length;
 
-            if (log.isDebugEnabled()) log.debug("wrote " + immediateDataArray.length + "bytes as immediate data");
+            log.debug("wrote " + immediateDataArray.length + "bytes as immediate data");
         }
 
         // *** receive unsolicited data ***
         if (!initialR2T && !bhs.isFinalFlag()) {
 
-            if (log.isDebugEnabled()) log.debug("receiving unsolicited data");
+            log.debug("receiving unsolicited data");
 
             boolean firstBurstOver = false;
             while (!firstBurstOver && bytesReceived <= firstBurstLength) {
@@ -168,7 +166,7 @@ public final class WriteStage extends ReadOrWriteStage {
 
         // *** receive solicited data ***
         if (bytesReceived < transferLengthInBytes) {
-            if (log.isDebugEnabled()) log.debug(bytesReceived + "<" + transferLengthInBytes);
+            log.debug(bytesReceived + "<" + transferLengthInBytes);
 
             int readyToTransferSequenceNumber = 0;
             int desiredDataTransferLength;

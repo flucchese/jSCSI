@@ -1,9 +1,12 @@
 package org.jscsi.target.settings;
 
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
+import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.parser.ProtocolDataUnit;
 import org.jscsi.parser.login.LoginStage;
 import org.jscsi.target.TargetServer;
@@ -40,6 +43,8 @@ import org.jscsi.target.settings.entry.Use;
  * @author Andreas Ergenzinger, University of Konstanz
  */
 public final class ConnectionSettingsNegotiator extends SettingsNegotiator {
+
+    private static final Logger log = LogManager.getLogger(ConnectionSettingsNegotiator.class);
 
     /**
      * The {@link SessionSettingsNegotiator} maintaining all {@link Entry} objects for session-wide parameters.
@@ -128,37 +133,35 @@ public final class ConnectionSettingsNegotiator extends SettingsNegotiator {
      * @param responseKeyValuePairs will contain the <i>key-value</i> pairs from the jSCSI target
      * @return <code>true</code> if everything went fine and <code>false</code> if there was an irreconcilable problem
      */
-    public boolean negotiate (TargetServer target, final LoginStage loginStage, final boolean leadingConnection, final boolean initialPdu, final List<String> requestKeyValuePairs, final List<String> responseKeyValuePairs) {
+    public boolean negotiate (TargetServer target,
+    							final LoginStage loginStage,
+    							final boolean leadingConnection,
+    							final boolean initialPdu,
+    							final List<String> requestKeyValuePairs,
+    							final List<String> responseKeyValuePairs) {
 
         // split up key=value pairs from requester
-        final List<String> keys = new Vector<>();
-        final List<String> values = new Vector<>();
+    	Map<String, String> pairs = new HashMap<>();
         for (String keyValuePair : requestKeyValuePairs) {
             final String[] split = TextParameter.splitKeyValuePair(keyValuePair);
             if (split == null) {
-                System.err.println("malformatted key=value pair: " + keyValuePair);
+                log.error("malformatted key=value pair: " + keyValuePair);
                 return false;
             }
-            keys.add(split[0]);
-            values.add(split[1]);
+            pairs.put(split[0], split[1]);
         }
 
         // get respective entry (declared by initiator, or negotiated) and
         // let it process the key=value pair
-        Entry entry;
         boolean everythingOkay = true;
-        while (keys.size() > 0) {
-            entry = getEntry(keys.get(0));
-            // respond to unknown keys
+        for (Map.Entry<String, String> pair : pairs.entrySet()) {
+        	Entry entry = getEntry(pair.getKey());
             if (entry == null) {
-                responseKeyValuePairs.add(TextParameter.toKeyValuePair(keys.get(0), TextKeyword.NOT_UNDERSTOOD));
+                responseKeyValuePairs.add(TextParameter.toKeyValuePair(pair.getKey(), TextKeyword.NOT_UNDERSTOOD));
             } else {// appropriate entry was found
                 // process key=value pair and remember if there is any trouble
-                everythingOkay &= entry.negotiate(target, loginStage, leadingConnection, initialPdu, keys.get(0), values.get(0), responseKeyValuePairs);
+                everythingOkay &= entry.negotiate(target, loginStage, leadingConnection, initialPdu, pair.getKey(), pair.getValue(), responseKeyValuePairs);
             }
-            // remove processed key and values
-            keys.remove(0);
-            values.remove(0);
         }
 
         // check if initiator has sent all mandatory parameters
@@ -176,15 +179,15 @@ public final class ConnectionSettingsNegotiator extends SettingsNegotiator {
                 // check if proposed TargetName is correct
                 final StringEntry targetNameEntry = (StringEntry) getEntry(TextKeyword.TARGET_NAME);
                 final String targetName = targetNameEntry.getStringValue();
-                if (targetName == null || // not declared
-                !target.isValidTargetName(targetName)) // wrong name
-                everythingOkay = false;
+                
+                // not declared | wrong name
+                everythingOkay = !(targetName == null || !target.isValidTargetName(targetName));
 
                 // send TargetAlias
                 String targetAlias = null;
                 if (everythingOkay) targetAlias = target.getTarget(targetName).getTargetAlias();// might
-                // be
-                // undefined
+
+                // be undefined
                 if (targetAlias != null) {
                     responseKeyValuePairs.add(TextParameter.toKeyValuePair(TextKeyword.TARGET_ALIAS, targetAlias));
                 }
@@ -218,7 +221,8 @@ public final class ConnectionSettingsNegotiator extends SettingsNegotiator {
         // check connection-only entries
         entry = getEntry(key, entries);
         if (entry == null) // keep looking in session-wide entries
-        entry = sessionSettingsNegotiator.getEntry(key);
+        	entry = sessionSettingsNegotiator.getEntry(key);
+        
         return entry;
     }
 

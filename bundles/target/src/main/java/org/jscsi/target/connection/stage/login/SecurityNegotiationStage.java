@@ -109,7 +109,12 @@ public final class SecurityNegotiationStage extends TargetLoginStage {
                                                                               // be
                                                                               // sent
                                                                               // back
-            if (!negotiator.negotiate(session.getTargetServer(), stageNumber, connection.isLeadingConnection(), ((TargetLoginPhase) targetPhase).getFirstPduAndSetToFalse(), requestKeyValuePairs, responseKeyValuePairs)) {
+            if (!negotiator.negotiate(session.getTargetServer(),
+            		stageNumber,
+            		connection.isLeadingConnection(),
+            		((TargetLoginPhase) targetPhase).getFirstPduAndSetToFalse(),
+            		requestKeyValuePairs,
+            		responseKeyValuePairs)) {
                 // negotiation error
                 sendRejectPdu(LoginStatus.INITIATOR_ERROR);
                 throw new InternetSCSIException("negotiation failure");

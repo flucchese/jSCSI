@@ -6,6 +6,8 @@ import java.security.DigestException;
 
 import javax.naming.OperationNotSupportedException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.BasicHeaderSegment;
 import org.jscsi.parser.ProtocolDataUnit;
@@ -26,6 +28,8 @@ import org.jscsi.target.settings.SettingsException;
  * @author Andreas Ergenzinger
  */
 public final class TargetLoginPhase extends TargetPhase {
+
+    private static final Logger log = LogManager.getLogger(TargetLoginPhase.class);
 
     /**
      * The current stage of this phase
@@ -109,6 +113,10 @@ public final class TargetLoginPhase extends TargetPhase {
                 if (nextStageNumber == LoginStage.LOGIN_OPERATIONAL_NEGOTIATION) {
                     // receive first PDU from LOPNS
                     pdu = connection.receivePdu();
+                    if (pdu == null) {
+                    	log.debug("Received an empty pdu. Bailing out...");
+                    	return false;
+                    }
                     bhs = pdu.getBasicHeaderSegment();
                     parser = (LoginRequestParser) bhs.getParser();
                 } else if (nextStageNumber == LoginStage.FULL_FEATURE_PHASE) {

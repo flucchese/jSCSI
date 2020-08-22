@@ -41,10 +41,8 @@ public class ReadStage extends ReadOrWriteStage {
         // ... from settings
         final boolean immediateData = settings.getImmediateData();
 
-        if (log.isDebugEnabled()) {
-            log.debug("immediateData = " + immediateData);
-            log.debug("maxRecvDataSegmentLength = " + settings.getMaxRecvDataSegmentLength());
-        }
+        log.debug("immediateData = " + immediateData);
+        log.debug("maxRecvDataSegmentLength = " + settings.getMaxRecvDataSegmentLength());
 
         // ... and from the PDU
         BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
@@ -83,12 +81,10 @@ public class ReadStage extends ReadOrWriteStage {
         final int totalTransferLength = session.getStorageModule().getBlockSize() * cdb.getTransferLength();
         final long storageOffset = session.getStorageModule().getBlockSize() * cdb.getLogicalBlockAddress();
 
-        if (log.isDebugEnabled()) {
-            log.debug("cdb.getLogicalBlockAddress() = " + cdb.getLogicalBlockAddress());
-            log.debug("blockSize = " + session.getStorageModule().getBlockSize());
-            log.debug("totalTransferLength = " + totalTransferLength);
-            log.debug("expectedDataSegmentLength = " + parser.getExpectedDataTransferLength());
-        }
+        log.debug("cdb.getLogicalBlockAddress() = " + cdb.getLogicalBlockAddress());
+        log.debug("blockSize = " + session.getStorageModule().getBlockSize());
+        log.debug("totalTransferLength = " + totalTransferLength);
+        log.debug("expectedDataSegmentLength = " + parser.getExpectedDataTransferLength());
 
         // *** start sending ***
         // initialize counters and data segment buffer

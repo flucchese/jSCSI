@@ -2,10 +2,11 @@ package org.jscsi.target.connection;
 
 
 import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.security.DigestException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.BasicHeaderSegment;
 import org.jscsi.parser.InitiatorMessageParser;
@@ -19,8 +20,6 @@ import org.jscsi.target.settings.Settings;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.settings.TextKeyword;
 import org.jscsi.target.util.Debug;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 
 /**
@@ -129,22 +128,13 @@ public class TargetSenderWorker {
             pdu = protocolDataUnitFactory.create(settings.getHeaderDigest(), settings.getDataDigest());
         }
 
-        try {
-            pdu.read(socketChannel);
-        } catch (ClosedChannelException e) {
-            throw new InternetSCSIException(e);
-        }
+        if (pdu.read(socketChannel)) {
+            log.debug("Receiving this PDU:\n" + pdu);
 
-        if (log.isDebugEnabled()) log.debug("Receiving this PDU:\n" + pdu);
+            // parse sequence counters
+            final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
+            final InitiatorMessageParser parser = (InitiatorMessageParser) bhs.getParser();
 
-        // parse sequence counters
-        final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
-        final InitiatorMessageParser parser = (InitiatorMessageParser) bhs.getParser();
-        // final int commandSequenceNumber = parser.getCommandSequenceNumber();
-        // final int expectedStatusSequenceNumber = parser.getExpectedStatusSequenceNumber();
-
-        if (log.isDebugEnabled()) {
-            // sharrajesh
             // Needed to debug, out of order receiving of StatusSN and ExpStatSN
             if (bhs.getOpCode() == OperationCode.SCSI_COMMAND) {
                 final SCSICommandParser scsiParser = (SCSICommandParser) bhs.getParser();
@@ -152,45 +142,29 @@ public class TargetSenderWorker {
                 log.debug("scsiOpCode = " + scsiOpCode);
                 log.debug("CDB bytes: \n" + Debug.byteBufferToString(scsiParser.getCDB()));
             }
-            // log.debug("parser.expectedStatusSequenceNumber: " + expectedStatusSequenceNumber);
+
             if (connection == null)
                 log.debug("connection: null");
             else if (connection.getStatusSequenceNumber() == null)
                 log.debug("connection.getStatusSequenceNumber: null");
             else
                 log.debug("connection.getStatusSequenceNumber: " + connection.getStatusSequenceNumber().getValue());
+
+            // if this is the first PDU in the leading connection, then
+            // initialize the session's ExpectedCommandSequenceNumber
+            if (initialPdu) {
+                initialPdu = false;
+            }
+
+            // increment CmdSN if not immediate PDU (or Data-Out PDU)
+            if (parser.incrementSequenceNumber()) {
+            	session.getExpectedCommandSequenceNumber().increment();
+            }
+
+            return pdu;
         }
 
-        // if this is the first PDU in the leading connection, then
-        // initialize the session's ExpectedCommandSequenceNumber
-        if (initialPdu) {
-            initialPdu = false;
-            // PDU is immediate Login PDU, checked in Target.main(),
-            // ExpCmdSN of this PDU will be used to initialize the
-            // respective session and connection parameters (sequence numbers)
-            // see TargetSession and TargetConnection initialization in
-            // Target.main()
-        } else {
-            // check sequence counters
-            // if (session.getMaximumCommandSequenceNumber().lessThan(commandSequenceNumber))
-            // throw new InternetSCSIException("received CmdSN > local MaxCmdSN");
-
-            // verified, is working with Windows 8 initiator
-            // if (!connection.getStatusSequenceNumber().equals(expectedStatusSequenceNumber)
-            // && expectedStatusSequenceNumber != 0)// required by MS iSCSI
-            // // initiator DATA-OUT
-            // // PDU sequence
-            // throw new InternetSCSIException("received ExpStatusSN != local StatusSN + 1");
-        }
-
-        // increment CmdSN if not immediate PDU (or Data-Out PDU)
-        try {
-            if (parser.incrementSequenceNumber()) session.getExpectedCommandSequenceNumber().increment();
-        } catch (NullPointerException exc) {
-
-        }
-
-        return pdu;
+        return null;
     }
 
     /**
@@ -212,9 +186,9 @@ public class TargetSenderWorker {
         parser.setMaximumCommandSequenceNumber(session.getMaximumCommandSequenceNumber().getValue());
         final boolean incrementSequenceNumber = parser.incrementSequenceNumber();
         if (incrementSequenceNumber) // set StatSN only if field is not reserved
-        parser.setStatusSequenceNumber(connection.getStatusSequenceNumber().getValue());
+        	parser.setStatusSequenceNumber(connection.getStatusSequenceNumber().getValue());
 
-        if (log.isDebugEnabled()) log.debug("Sending this PDU:\n" + pdu);
+        log.debug("Sending this PDU:\n" + pdu);
 
         // send pdu
         pdu.write(socketChannel);

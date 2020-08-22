@@ -42,14 +42,11 @@ public final class ModeSenseStage extends TargetFullFeatureStage {
         final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
         final ModeSense6Cdb cdb = new ModeSense6Cdb(parser.getCDB());
 
-        if (log.isDebugEnabled()) {
-            log.debug(Boolean.toString(cdb.getDisableBlockDescriptors()));
-            log.debug(cdb.getPageControl().toString());
-            log.debug(Integer.toString(cdb.getPageCode()));
-            log.debug(Integer.toString(cdb.getSubpageCode()));
-            log.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
-            // log.debug(cdb.getModePage());
-        }
+        log.debug(Boolean.toString(cdb.getDisableBlockDescriptors()));
+        log.debug(cdb.getPageControl().toString());
+        log.debug(Integer.toString(cdb.getPageCode()));
+        log.debug(Integer.toString(cdb.getSubpageCode()));
+        log.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
 
         // final PageControl pageControl = cdb.getPageControl();//see 8 lines
         // below

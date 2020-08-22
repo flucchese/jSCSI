@@ -59,12 +59,18 @@ public final class LogoutResponseState extends AbstractState {
 
         final ProtocolDataUnit protocolDataUnit = connection.receive();
 
-        if (!(protocolDataUnit.getBasicHeaderSegment().getParser() instanceof LogoutResponseParser)) { throw new InternetSCSIException("This PDU type (" + protocolDataUnit.getBasicHeaderSegment().getParser() + ") is not expected. "); }
+        if (protocolDataUnit == null) {
+        	log.debug("Received an empty pdu. Bailing out...");
+        	return;
+        }
+
+        if (!(protocolDataUnit.getBasicHeaderSegment().getParser() instanceof LogoutResponseParser)) {
+        	throw new InternetSCSIException("This PDU type (" + protocolDataUnit.getBasicHeaderSegment().getParser() + ") is not expected. ");
+        }
 
         final LogoutResponseParser parser = (LogoutResponseParser) protocolDataUnit.getBasicHeaderSegment().getParser();
 
         if (parser.getResponse() == LogoutResponse.CONNECTION_CLOSED_SUCCESSFULLY) {
-            // exception rethrow
             try {
                 // FIXME: Implement Connection close
                 connection.getSession().close();
@@ -74,8 +80,6 @@ public final class LogoutResponseState extends AbstractState {
         } else {
             throw new InternetSCSIException("The connection could not be closed successfully.");
         }
-
-        // return false;
     }
 
     // --------------------------------------------------------------------------

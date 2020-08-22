@@ -168,20 +168,19 @@ public interface Connection extends Callable<Void> {
         public ProtocolDataUnit receivePdu () throws DigestException , InternetSCSIException , IOException , SettingsException {
             lastReceivedPDU = senderWorker.receiveFromWire();
 
-            if (lastReceivedPDU.getBasicHeaderSegment().getOpCode().equals(OperationCode.NOP_OUT)) {
+            if (lastReceivedPDU != null &&
+            	OperationCode.NOP_OUT.equals(lastReceivedPDU.getBasicHeaderSegment().getOpCode())) {
                 try {
-                    // System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Handling ping immediately..");
-                    // System.out.println("******************************\nRecieving\nSystem Time: " + new
-                    // java.sql.Timestamp(System.currentTimeMillis()).toString() + "\n" + lastReceivedPDU +
-                    // "\n******************************");
                     new PingStage(new TargetFullFeaturePhase(this)).execute(lastReceivedPDU);
-                } catch (InterruptedException e) {}
+                } catch (InterruptedException e) {
+                    log.warn("Interrupted!", e);
+                    // Restore interrupted state...
+                    Thread.currentThread().interrupt();
+                }
+                
                 lastReceivedPDU = senderWorker.receiveFromWire();
             }
 
-            // System.out.println("******************************\nRecieving\nSystem Time: " + new
-            // java.sql.Timestamp(System.currentTimeMillis()).toString() + "\n" + lastReceivedPDU +
-            // "\n******************************");
             return lastReceivedPDU;
         }
 
@@ -194,9 +193,6 @@ public interface Connection extends Callable<Void> {
          * @throws InternetSCSIException
          */
         public void sendPdu (ProtocolDataUnit pdu) throws InterruptedException , IOException , InternetSCSIException {
-            // System.out.println("******************************\nSending\nSystem Time: " + new
-            // java.sql.Timestamp(System.currentTimeMillis()).toString() + "\n" + pdu +
-            // "\n******************************");
             senderWorker.sendOverWire(pdu);
         }
 
@@ -208,7 +204,6 @@ public interface Connection extends Callable<Void> {
          * 
          */
         public Void call () {
-
             try {
                 // *** login phase ***
                 phase = new TargetLoginPhase(this);
@@ -221,12 +216,18 @@ public interface Connection extends Callable<Void> {
                     targetSession.setTargetName(settings.getTargetName());
                     // *** full feature phase ***
                     phase = new TargetFullFeaturePhase(this);
-
                     phase.execute();
                 }
                 senderWorker.close();
-            } catch (OperationNotSupportedException | IOException | InterruptedException | InternetSCSIException | DigestException
-                    | SettingsException e) {
+            } catch (InterruptedException e) {
+                log.warn("Interrupted!", e);
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
+            } catch (OperationNotSupportedException |
+            			IOException |
+            			InternetSCSIException |
+            			DigestException |
+            			SettingsException e) {
                 log.error("Exception throws", e);
             }
 

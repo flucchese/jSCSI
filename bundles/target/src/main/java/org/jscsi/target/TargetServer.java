@@ -258,33 +258,36 @@ public class TargetServer implements Callable<Void> {
                 TargetConnection newConnection = new TargetConnection(socketChannel, true);
                 try {
                     final ProtocolDataUnit pdu = newConnection.receivePdu();
-                    // confirm OpCode-
-                    if (pdu.getBasicHeaderSegment().getOpCode() != OperationCode.LOGIN_REQUEST) throw new InternetSCSIException();
-                    // get initiatorSessionID
                     
-                    LoginRequestParser parser = (LoginRequestParser) pdu.getBasicHeaderSegment().getParser();
-                    ISID initiatorSessionID = parser.getInitiatorSessionID();
+                    if (pdu != null) {
+                        // confirm OpCode-
+                        if (pdu.getBasicHeaderSegment().getOpCode() != OperationCode.LOGIN_REQUEST) throw new InternetSCSIException();
+                        // get initiatorSessionID
+                        
+                        LoginRequestParser parser = (LoginRequestParser) pdu.getBasicHeaderSegment().getParser();
+                        ISID initiatorSessionID = parser.getInitiatorSessionID();
 
-                    /*
-                     * TODO get (new or existing) session based on TSIH But since we don't do session reinstatement and
-                     * MaxConnections=1, we can just create a new one.
-                     */
-                    TargetSession session = new TargetSession(this, newConnection, initiatorSessionID, parser.getCommandSequenceNumber(),// set
-                                                                                                                                      // ExpCmdSN
-                                                                                                                                      // (PDU
-                                                                                                                                      // is
-                                                                                                                                      // immediate,
-                                                                                                                                      // hence
-                                                                                                                                      // no
-                                                                                                                                      // ++)
-                    parser.getExpectedStatusSequenceNumber());
+                        /*
+                         * TODO get (new or existing) session based on TSIH
+                         * But since we don't do session reinstatement and
+                         * MaxConnections=1, we can just create a new one.
+                         */
+                        TargetSession session = new TargetSession(this, newConnection, initiatorSessionID, parser.getCommandSequenceNumber(),// set
+                                                                                                                                          // ExpCmdSN
+                                                                                                                                          // (PDU
+                                                                                                                                          // is
+                                                                                                                                          // immediate,
+                                                                                                                                          // hence
+                                                                                                                                          // no
+                                                                                                                                          // ++)
+                        parser.getExpectedStatusSequenceNumber());
 
-                    sessions.add(session);
-                    // threadPool.submit(connection);// ignore returned Future
-                    workerPool.submit(new ConnectionHandler(newConnection)); // ignore returned Future
+                        sessions.add(session);
+                        // threadPool.submit(connection);// ignore returned Future
+                        workerPool.submit(new ConnectionHandler(newConnection)); // ignore returned Future
+                    }
                 } catch (DigestException | InternetSCSIException | SettingsException e) {
                     log.info("Throws Exception", e);
-                    continue;
                 }
             }
         } catch (IOException e) {
@@ -292,12 +295,14 @@ public class TargetServer implements Callable<Void> {
             log.error("Throws Exception", e);
         }
 
-        System.out.println("Closing socket channel.");
+        log.debug("Closing socket channel.");
         serverSocketChannel.close();
-        for(TargetSession session: sessions){
-            System.out.println("Commiting uncommited changes.");
+        
+        for (TargetSession session: sessions){
+        	log.debug("Commiting uncommited changes.");
             session.getStorageModule().close();
         }
+        
         return null;
     }
 

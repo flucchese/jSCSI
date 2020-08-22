@@ -77,6 +77,11 @@ public final class LoginResponseState extends AbstractState {
         do {
             protocolDataUnit = connection.receive();
 
+            if (protocolDataUnit == null) {
+            	log.debug("Received an empty pdu. Bailing out...");
+            	return;
+            }
+
             if (!(protocolDataUnit.getBasicHeaderSegment().getParser() instanceof LoginResponseParser)) {
                 break;
             }
@@ -105,11 +110,8 @@ public final class LoginResponseState extends AbstractState {
                 connection.getSession().setPhase(new LoginOperationalNegotiationPhase());
             } else if (nextStage == LoginStage.FULL_FEATURE_PHASE) {
                 connection.getSession().setPhase(new FullFeaturePhase());
-                // return false;
             }
         }
-
-        // return true;
     }
 
     // --------------------------------------------------------------------------

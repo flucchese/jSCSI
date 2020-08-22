@@ -356,7 +356,7 @@ public final class BasicHeaderSegment {
         if (parser == null) {
             final StringBuilder sb = new StringBuilder();
             Utils.printField(sb, "ParserClass", "null", 1);
-            Utils.printField(sb, "OpCode", this.getOpCode().toString(), 1);
+            Utils.printField(sb, "OpCode", (getOpCode() == null ? "null" : getOpCode().toString()), 1);
             Utils.printField(sb, "FinalFlag", finalFlag, 1);
             Utils.printField(sb, "TotalAHSLength", totalAHSLength, 1);
             Utils.printField(sb, "DataSegmentLength", dataSegmentLength, 1);
@@ -410,9 +410,8 @@ public final class BasicHeaderSegment {
      * Clears all the stored content of this BasicHeaderSegment object.
      */
     final void clear () {
-
         immediateFlag = false;
-        operationCode = OperationCode.LOGIN_REQUEST;
+        operationCode = null;
         finalFlag = false;
 
         totalAHSLength = 0x00;

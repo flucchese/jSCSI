@@ -65,49 +65,16 @@ final class GetConnectionsResponseState extends AbstractState {
         do {
             protocolDataUnit = connection.receive();
 
+            if (protocolDataUnit == null) {
+            	log.debug("Received an empty pdu. Bailing out...");
+            	return;
+            }
+            
             if (!(protocolDataUnit.getBasicHeaderSegment().getParser() instanceof TextResponseParser)) {
-                break;
+                return;
             }
 
             textResponse.append(protocolDataUnit.getDataSegment(), protocolDataUnit.getBasicHeaderSegment().getDataSegmentLength());
         } while (!protocolDataUnit.getBasicHeaderSegment().isFinalFlag());
-
-        // extract Target Session Handle Identifying Handle
-        // final TextResponseParser parser = (TextResponseParser)
-        // protocolDataUnit.getBasicHeaderSegment().getParser();
-        // final ByteBuffer textDataSegment = ByteBuffer
-        // .allocate(AbstractDataSegment.getTotalLength(textResponse.getLength()));
-        // textResponse.serialize(textDataSegment, 0);
-        //
-        // try {
-        // final String response = new String(textDataSegment.array(), "UTF-8");
-        // final String[] lines = response.split("\0");
-        // } catch (UnsupportedEncodingException e) {
-        // if (log.isErrorEnabled()) {
-        // log.error("Unsupported Encoding Exception: " +
-        // e.getLocalizedMessage());
-        // }
-        // }
-
-        // return false;
     }
-
-    // --------------------------------------------------------------------------
-    // --------------------------------------------------------------------------
-
-    // /** {@inheritDoc} */
-    // @Override
-    // public final boolean isCorrect(final ProtocolDataUnit protocolDataUnit)
-    // throws InternetSCSIException {
-    //
-    // // FIXME: Reject must also be supported.
-    // return protocolDataUnit.getBasicHeaderSegment().getParser() instanceof
-    // TextResponseParser;
-    // }
-
-    // --------------------------------------------------------------------------
-    // --------------------------------------------------------------------------
-    // --------------------------------------------------------------------------
-    // --------------------------------------------------------------------------
-
 }

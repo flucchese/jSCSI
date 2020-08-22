@@ -301,12 +301,9 @@ public final class Connection {
      * @throws InternetSCSIException for nearly everything
      */
     public final ProtocolDataUnit receive () throws InternetSCSIException {
-
         try {
             return senderReceiver.receiveFromWire();
-        } catch (DigestException e) {
-            throw new InternetSCSIException(e);
-        } catch (IOException e) {
+        } catch (DigestException | IOException e) {
             throw new InternetSCSIException(e);
         }
     }

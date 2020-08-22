@@ -43,20 +43,16 @@ public class InquiryStage extends TargetFullFeatureStage {
         ProtocolDataUnit responsePdu;// the response PDU
 
         // get command details in CDB
-        if (log.isDebugEnabled()) {// print CDB bytes
-            log.debug("CDB bytes: \n" + Debug.byteBufferToString(parser.getCDB()));
-        }
+        log.debug("CDB bytes: \n" + Debug.byteBufferToString(parser.getCDB()));
 
         final InquiryCDB cdb = new InquiryCDB(parser.getCDB());
         final FieldPointerSenseKeySpecificData[] illegalFieldPointers = cdb.getIllegalFieldPointers();
 
-        if (log.isDebugEnabled()) {
-            log.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
-            log.debug("cdb.getEnableVitalProductData() = " + cdb.getEnableVitalProductData());
-            log.debug("cdb.isNormalACA() = " + cdb.isNormalACA());
-            log.debug("cdb.getPageCode() = " + cdb.getPageCode());
-            log.debug("cdb.getPageCode().getVitalProductDataPageName() = " + cdb.getPageCode().getVitalProductDataPageName());
-        }
+        log.debug("cdb.getAllocationLength() = " + cdb.getAllocationLength());
+        log.debug("cdb.getEnableVitalProductData() = " + cdb.getEnableVitalProductData());
+        log.debug("cdb.isNormalACA() = " + cdb.isNormalACA());
+        log.debug("cdb.getPageCode() = " + cdb.getPageCode());
+        log.debug("cdb.getPageCode().getVitalProductDataPageName() = " + cdb.getPageCode().getVitalProductDataPageName());
 
         if (illegalFieldPointers != null) {
             // an illegal request has been made

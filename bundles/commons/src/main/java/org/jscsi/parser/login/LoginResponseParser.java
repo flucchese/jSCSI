@@ -350,7 +350,6 @@ public final class LoginResponseParser extends TargetMessageParser {
     /** {@inheritDoc} */
     @Override
     protected final void deserializeBytes36to39 (final int line) throws InternetSCSIException {
-
         status = LoginStatus.valueOf((short) ((line & Constants.FIRST_TWO_BYTES_MASK) >>> Constants.TWO_BYTES_SHIFT));
         Utils.isReserved(line & Constants.LAST_TWO_BYTES_MASK);
     }
@@ -361,19 +360,9 @@ public final class LoginResponseParser extends TargetMessageParser {
     /** {@inheritDoc} */
     @Override
     protected final void checkIntegrity () throws InternetSCSIException {
-
-        String exceptionMessage;
-        do {
-            if (status != LoginStatus.SUCCESS && statusSequenceNumber != 0) {
-                exceptionMessage = "While no successful login is preformed, the StatusSequenceNumber must be 0.";
-                break;
-            }
-
-            // message is checked correctly
-            return;
-        } while (false);
-
-        throw new InternetSCSIException(exceptionMessage);
+        if (status != LoginStatus.SUCCESS && statusSequenceNumber != 0) {
+            throw new InternetSCSIException("While no successful login is preformed, the StatusSequenceNumber must be 0.");
+        }
     }
 
     // --------------------------------------------------------------------------
