@@ -135,7 +135,7 @@ public class TargetServer implements Callable<Void> {
     public static void main (String[] args) throws Exception {
         TargetServer target;
 
-        System.out.println("This system provides more than one IP Address to advertise.\n");
+        log.info("This system provides more than one IP Address to advertise.\n");
 
         Enumeration<NetworkInterface> interfaceEnum = NetworkInterface.getNetworkInterfaces();
         NetworkInterface i;
@@ -148,7 +148,7 @@ public class TargetServer implements Callable<Void> {
 
             while (addressEnum.hasMoreElements()) {
                 address = addressEnum.nextElement();
-                System.out.println("[" + addressCounter + "] " + address.getHostAddress());
+                log.info("[" + addressCounter + "] " + address.getHostAddress());
                 addresses.add(address);
                 addressCounter++;
             }
@@ -158,7 +158,7 @@ public class TargetServer implements Callable<Void> {
          * Getting the desired address from the command line. You can't automatically make sure to always use the
          * correct host address.
          */
-        System.out.print("\nWhich one should be used?\nType in the number: ");
+        log.info("Which one should be used?\nType in the number: ");
         Integer chosenIndex = null;
 
         while (chosenIndex == null) {
@@ -172,9 +172,8 @@ public class TargetServer implements Callable<Void> {
         }
 
         String targetAddress = addresses.get(chosenIndex).getHostAddress();
-        System.out.println("Using ip address " + addresses.get(chosenIndex).getHostAddress());
-        
-        
+        log.info("Using ip address " + addresses.get(chosenIndex).getHostAddress());
+
         switch (args.length) {
             case 0 :
                 target = new TargetServer(Configuration.create(targetAddress));
@@ -218,7 +217,6 @@ public class TargetServer implements Callable<Void> {
                 synchronized (targets) {
                     Target target = targetConnection.getTargetSession().getTarget();
                     if (target != null) {
-                        targets.remove(target.getTargetName());
                         try {
                             target.getStorageModule().close();
                         } catch (Exception e) {
