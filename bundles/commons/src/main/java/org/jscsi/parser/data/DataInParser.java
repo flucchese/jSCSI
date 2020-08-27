@@ -458,19 +458,23 @@ public class DataInParser extends TargetMessageParser {
     protected int serializeBytes1to3 () {
 
         int line = status.value();
+        
         if (acknowledgeFlag) {
             line |= ACKNOWLEDGE_FLAG_MASK;
         }
+
         if (residualOverflow) {
-            line |= Constants.READ_RESIDUAL_OVERFLOW_FLAG_MASK;
+            line |= Constants.RESIDUAL_OVERFLOW_FLAG_MASK;
         }
+
         if (residualUnderflow) {
-            line |= Constants.READ_RESIDUAL_UNDERFLOW_FLAG_MASK;
+            line |= Constants.RESIDUAL_UNDERFLOW_FLAG_MASK;
         }
+
         if (statusFlag) {
             line |= STATUS_FLAG_MASK;
         }
-
+        
         return line;
     }
 

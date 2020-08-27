@@ -21,18 +21,17 @@ package org.jscsi.initiator.connection;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.security.DigestException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.InitiatorMessageParser;
 import org.jscsi.parser.ProtocolDataUnit;
 import org.jscsi.parser.ProtocolDataUnitFactory;
 import org.jscsi.parser.TargetMessageParser;
 import org.jscsi.parser.datasegment.OperationalTextKey;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 
 /**
