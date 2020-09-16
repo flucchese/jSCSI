@@ -169,6 +169,7 @@ public final class TargetFullFeaturePhase extends TargetPhase {
                         break;
                     case TEXT_REQUEST :
                         stage = new TextNegotiationStage(this);
+                        running = false;
                         break;
                     case LOGOUT_REQUEST :
                         stage = new LogoutStage(this);
