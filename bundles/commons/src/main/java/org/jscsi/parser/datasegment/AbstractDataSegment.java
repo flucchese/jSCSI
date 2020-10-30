@@ -112,7 +112,6 @@ public abstract class AbstractDataSegment implements IDataSegment {
      * @return The total length.
      */
     public static final int getTotalLength (final int len) {
-
         return len + calcPadding(len);
     }
 
@@ -256,7 +255,7 @@ public abstract class AbstractDataSegment implements IDataSegment {
      * @param len The length for which the padding bytes are calculated.
      * @return The number of padding bytes.
      */
-    protected static final int calcPadding (final int len) {
+    public static final int calcPadding (final int len) {
 
         if (len < 0) { throw new IllegalArgumentException("Length must be a positive number"); }
 

@@ -271,12 +271,9 @@ public final class Connection {
      * @throws InternetSCSIException for nearly everything
      */
     public final void send (final ProtocolDataUnit protocolDataUnit) throws InternetSCSIException {
-
         try {
             senderReceiver.sendOverWire(protocolDataUnit);
         } catch (IOException e) {
-            throw new InternetSCSIException(e);
-        } catch (InterruptedException e) {
             throw new InternetSCSIException(e);
         }
     }

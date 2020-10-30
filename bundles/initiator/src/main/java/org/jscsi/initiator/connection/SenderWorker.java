@@ -164,7 +164,7 @@ public final class SenderWorker {
      *             was waiting for a notification. The interrupted status of the current caller is cleared when this
      *             exception is thrown.
      */
-    public final void sendOverWire (final ProtocolDataUnit unit) throws InternetSCSIException , IOException , InterruptedException {
+    public final void sendOverWire (final ProtocolDataUnit unit) throws InternetSCSIException, IOException {
 
         final Session session = connection.getSession();
 
@@ -181,7 +181,6 @@ public final class SenderWorker {
         if (parser.incrementSequenceNumber()) {
             connection.getSession().incrementCommandSequenceNumber();
         }
-
     }
 
     // --------------------------------------------------------------------------

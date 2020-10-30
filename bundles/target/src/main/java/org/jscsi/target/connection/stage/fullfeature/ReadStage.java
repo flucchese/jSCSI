@@ -90,25 +90,16 @@ public class ReadStage extends ReadOrWriteStage {
         // initialize counters and data segment buffer
         int bytesSent = 0;
         int dataSequenceNumber = 0;
-        byte[] dataSegmentArray = null;
-        ByteBuffer dataSegment = null;
         ProtocolDataUnit responsePdu;
 
         // *** send up to last but one Data-In PDU ***
         // (with DataSegmentSize == MaxRecvDataSegmentLength)
-
-        if (bytesSent < totalTransferLength - settings.getMaxRecvDataSegmentLength()) {
-            /*
-             * Initialize dataSegmentArray and dataSegment with MaxRecvDataSegmentLength bytes.
-             */
-            dataSegmentArray = connection.getDataInArray(settings.getMaxRecvDataSegmentLength());
-            dataSegment = ByteBuffer.wrap(dataSegmentArray);
-        }
-
         while (bytesSent < totalTransferLength - settings.getMaxRecvDataSegmentLength()) {
 
             // get data and prepare data segment
-            session.getStorageModule().read(dataSegmentArray, storageOffset + bytesSent);
+            //session.getStorageModule().read(dataSegmentArray, storageOffset + bytesSent);
+        	ByteBuffer dataSegment = session.getStorageModule().getMappedBuffer(storageOffset + bytesSent,
+        																		settings.getMaxRecvDataSegmentLength());
 
             // create and send PDU
             responsePdu = TargetPduFactory.createDataInPdu(false,// finalFlag,
@@ -146,9 +137,7 @@ public class ReadStage extends ReadOrWriteStage {
 
         // get data and prepare data segment
         final int bytesRemaining = totalTransferLength - bytesSent;
-        dataSegmentArray = connection.getDataInArray(bytesRemaining);
-        session.getStorageModule().read(dataSegmentArray, storageOffset + bytesSent);
-        dataSegment = ByteBuffer.wrap(dataSegmentArray);
+    	ByteBuffer dataSegment = session.getStorageModule().getMappedBuffer(storageOffset + bytesSent, bytesRemaining);
 
         // create and send PDU (with or without status)
         responsePdu = TargetPduFactory.createDataInPdu(true,// finalFlag, last
@@ -173,7 +162,6 @@ public class ReadStage extends ReadOrWriteStage {
 
         // send SCSI Response PDU?
         if (!immediateData) {
-
             responsePdu = TargetPduFactory.createSCSIResponsePdu(false,// bidirectionalReadResidualOverflow
                     false,// bidirectionalReadResidualUnderflow
                     false,// residualOverflow
@@ -191,7 +179,5 @@ public class ReadStage extends ReadOrWriteStage {
             log.debug("sending SCSI Response PDU");
             connection.sendPdu(responsePdu);
         }
-
     }
-
 }
