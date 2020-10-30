@@ -128,43 +128,43 @@ public class TargetSenderWorker {
             pdu = protocolDataUnitFactory.create(settings.getHeaderDigest(), settings.getDataDigest());
         }
 
-        if (pdu.read(socketChannel)) {
-            log.debug("Receiving this PDU:\n" + pdu);
+        pdu.read(socketChannel);
 
-            // parse sequence counters
-            final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
-            final InitiatorMessageParser parser = (InitiatorMessageParser) bhs.getParser();
+        // parse sequence counters
+        final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
+        if (bhs == null) {
+        	return null;
+        }
+        log.debug("Receiving this PDU:\n" + pdu);
+        final InitiatorMessageParser parser = (InitiatorMessageParser) bhs.getParser();
 
-            // Needed to debug, out of order receiving of StatusSN and ExpStatSN
-            if (bhs.getOpCode() == OperationCode.SCSI_COMMAND) {
-                final SCSICommandParser scsiParser = (SCSICommandParser) bhs.getParser();
-                ScsiOperationCode scsiOpCode = ScsiOperationCode.valueOf(scsiParser.getCDB().get(0));
-                log.debug("scsiOpCode = " + scsiOpCode);
-                log.debug("CDB bytes: \n" + Debug.byteBufferToString(scsiParser.getCDB()));
-            }
-
-            if (connection == null)
-                log.debug("connection: null");
-            else if (connection.getStatusSequenceNumber() == null)
-                log.debug("connection.getStatusSequenceNumber: null");
-            else
-                log.debug("connection.getStatusSequenceNumber: " + connection.getStatusSequenceNumber().getValue());
-
-            // if this is the first PDU in the leading connection, then
-            // initialize the session's ExpectedCommandSequenceNumber
-            if (initialPdu) {
-                initialPdu = false;
-            }
-
-            // increment CmdSN if not immediate PDU (or Data-Out PDU)
-            if (parser.incrementSequenceNumber()) {
-            	session.getExpectedCommandSequenceNumber().increment();
-            }
-
-            return pdu;
+        // Needed to debug, out of order receiving of StatusSN and ExpStatSN
+        if (bhs.getOpCode() == OperationCode.SCSI_COMMAND) {
+            final SCSICommandParser scsiParser = (SCSICommandParser) bhs.getParser();
+            ScsiOperationCode scsiOpCode = ScsiOperationCode.valueOf(scsiParser.getCDB().get(0));
+            log.debug("scsiOpCode = " + scsiOpCode);
+            log.debug("CDB bytes: \n" + Debug.byteBufferToString(scsiParser.getCDB()));
         }
 
-        return null;
+        if (connection == null)
+            log.debug("connection: null");
+        else if (connection.getStatusSequenceNumber() == null)
+            log.debug("connection.getStatusSequenceNumber: null");
+        else
+            log.debug("connection.getStatusSequenceNumber: " + connection.getStatusSequenceNumber().getValue());
+
+        // if this is the first PDU in the leading connection, then
+        // initialize the session's ExpectedCommandSequenceNumber
+        if (initialPdu) {
+            initialPdu = false;
+        }
+
+        // increment CmdSN if not immediate PDU (or Data-Out PDU)
+        if (parser.incrementSequenceNumber()) {
+        	session.getExpectedCommandSequenceNumber().increment();
+        }
+
+        return pdu;
     }
 
     /**

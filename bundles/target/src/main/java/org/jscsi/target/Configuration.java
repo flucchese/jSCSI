@@ -24,9 +24,7 @@ import javax.xml.validation.Validator;
 import org.jscsi.target.scsi.lun.LogicalUnitNumber;
 import org.jscsi.target.settings.TextKeyword;
 import org.jscsi.target.storage.IStorageModule;
-import org.jscsi.target.storage.JCloudsStorageModule;
 import org.jscsi.target.storage.RandomAccessStorageModule;
-import org.jscsi.target.storage.SynchronizedRandomAccessStorageModule;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -55,10 +53,6 @@ public class Configuration {
                                                           // that contain a
                                                           // target
     // Target configuration elements
-    public static final String ELEMENT_SYNCFILESTORAGE = "SyncFileStorage";
-    public static final String ELEMENT_ASYNCFILESTORAGE = "AsyncFileStorage";
-    public static final String ELEMENT_JCLOUDSSTORAGE = "JCloudsStorage";
-    public static final String ELEMENT_FILESTORAGE = "FileStorage";
     public static final String ELEMENT_CREATE = "Create";
     public static final String ATTRIBUTE_SIZE = "size";
 
@@ -308,10 +302,7 @@ public class Configuration {
 
     protected static Target parseTargetElement (Element targetElement) throws IOException {
         // TargetName
-        // TargetName
         Node nextNode = chopWhiteSpaces(targetElement.getFirstChild());
-        // assert
-        // nextNode.getLocalName().equals(OperationalTextKey.TARGET_NAME);
         String targetName = nextNode.getTextContent();
 
         // TargetAlias (optional)
@@ -322,24 +313,9 @@ public class Configuration {
             nextNode = chopWhiteSpaces(nextNode.getNextSibling());
         }
 
-        // Finding out the concrete storage
-        Class<? extends IStorageModule> kind = null;
-        switch (nextNode.getLocalName()) {
-            case ELEMENT_SYNCFILESTORAGE :
-                kind = SynchronizedRandomAccessStorageModule.class;
-                break;
-            case ELEMENT_ASYNCFILESTORAGE :
-                kind = RandomAccessStorageModule.class;
-                break;
-            case ELEMENT_JCLOUDSSTORAGE :
-                kind = JCloudsStorageModule.class;
-                break;
-        }
-
         // Getting storagepath
         nextNode = nextNode.getFirstChild();
         nextNode = chopWhiteSpaces(nextNode);
-        // assert nextNode.getLocalName().equals(ELEMENT_PATH);
         String storageFilePath = nextNode.getTextContent();
 
         // CreateNode with size
@@ -348,13 +324,12 @@ public class Configuration {
         boolean create = true;
         if (nextNode.getLocalName().equals(ELEMENT_CREATE)) {
             Node sizeAttribute = nextNode.getAttributes().getNamedItem(ATTRIBUTE_SIZE);
-            storageLength = Math.round(Double.valueOf(sizeAttribute.getTextContent()) * Math.pow(1024, 3));
+            storageLength = Long.valueOf(sizeAttribute.getTextContent());
         } else {
             storageLength = new File(storageFilePath).length();
             create = false;
-            // assert nextNode.getLocalName().equals(ELEMENT_DONTCREATE);
         }
-        final IStorageModule module = RandomAccessStorageModule.open(new File(storageFilePath), storageLength, create, kind);
+        final IStorageModule module = new RandomAccessStorageModule(new File(storageFilePath), storageLength, create);
 
         return new Target(targetName, targetAlias, module);
 

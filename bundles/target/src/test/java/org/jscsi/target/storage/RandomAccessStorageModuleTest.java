@@ -27,13 +27,22 @@ public class RandomAccessStorageModuleTest {
         File file = new File(TEST_FILE_NAME);
         // make sure the file exists, has the correct length and is
         // accessible via module, if RandomAccessModule is chosen
-        module = RandomAccessStorageModule.open(file, TEST_FILE_SIZE, true, RandomAccessStorageModule.class);
+        module = new RandomAccessStorageModule(file, TEST_FILE_SIZE, true);
     }
 
+    public static boolean recursiveDelete (final File pFile) {
+        if (pFile.isDirectory()) {
+            for (final File child : pFile.listFiles()) {
+                if (!recursiveDelete(child)) { return false; }
+            }
+        }
+        return pFile.delete();
+    }
+    
     @AfterClass
     public static void tearDownAfterClass () throws Exception {
         module.close();// must be closed for delete to work
-        RandomAccessStorageModule.recursiveDelete(new File(TEST_FILE_NAME));
+        recursiveDelete(new File(TEST_FILE_NAME));
     }
 
     @Test

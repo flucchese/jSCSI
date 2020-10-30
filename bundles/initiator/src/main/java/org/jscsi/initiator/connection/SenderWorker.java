@@ -27,6 +27,7 @@ import java.security.DigestException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
+import org.jscsi.parser.BasicHeaderSegment;
 import org.jscsi.parser.InitiatorMessageParser;
 import org.jscsi.parser.ProtocolDataUnit;
 import org.jscsi.parser.ProtocolDataUnitFactory;
@@ -111,44 +112,43 @@ public final class SenderWorker {
      * @throws InternetSCSIException if any violation of the iSCSI-Standard emerge.
      * @throws DigestException if a mismatch of the digest exists.
      */
-    public ProtocolDataUnit receiveFromWire () throws DigestException , InternetSCSIException , IOException {
+    public ProtocolDataUnit receiveFromWire () throws DigestException, InternetSCSIException, IOException {
 
         final ProtocolDataUnit protocolDataUnit = protocolDataUnitFactory.create(connection.getSetting(OperationalTextKey.HEADER_DIGEST), connection.getSetting(OperationalTextKey.DATA_DIGEST));
 
-        if (protocolDataUnit.read(socketChannel)) {
+        protocolDataUnit.read(socketChannel);
+
+        final Exception isCorrect = connection.getState().isCorrect(protocolDataUnit);
+        if (isCorrect == null) {
+            final BasicHeaderSegment bhs = protocolDataUnit.getBasicHeaderSegment();
+            if (bhs == null) {
+            	return null;
+            }
             log.debug("Receiving this PDU: " + protocolDataUnit);
+            final TargetMessageParser parser = (TargetMessageParser) bhs.getParser();
+            final Session session = connection.getSession();
 
-            final Exception isCorrect = connection.getState().isCorrect(protocolDataUnit);
-            if (isCorrect == null) {
-                log.trace("Adding PDU to Receiving Queue.");
-
-                final TargetMessageParser parser = (TargetMessageParser) protocolDataUnit.getBasicHeaderSegment().getParser();
-                final Session session = connection.getSession();
-
-                // the PDU maxCmdSN is greater than the local maxCmdSN, so we
-                // have to update the local one
-                if (session.getMaximumCommandSequenceNumber().compareTo(parser.getMaximumCommandSequenceNumber()) < 0) {
-                    session.setMaximumCommandSequenceNumber(parser.getMaximumCommandSequenceNumber());
-                }
-
-                // the PDU expCmdSN is greater than the local expCmdSN, so we
-                // have to update the local one
-                if (parser.incrementSequenceNumber()) {
-                    if (connection.getExpectedStatusSequenceNumber().compareTo(parser.getStatusSequenceNumber()) >= 0) {
-                        connection.incrementExpectedStatusSequenceNumber();
-                    } else {
-                        log.error("Status Sequence Number Mismatch (received, expected): " + parser.getStatusSequenceNumber() + ", " + (connection.getExpectedStatusSequenceNumber().getValue() - 1));
-                    }
-
-                }
-            } else {
-                throw new InternetSCSIException(isCorrect);
+            // the PDU maxCmdSN is greater than the local maxCmdSN, so we
+            // have to update the local one
+            if (session.getMaximumCommandSequenceNumber().compareTo(parser.getMaximumCommandSequenceNumber()) < 0) {
+                session.setMaximumCommandSequenceNumber(parser.getMaximumCommandSequenceNumber());
             }
 
-            return protocolDataUnit;
+            // the PDU expCmdSN is greater than the local expCmdSN, so we
+            // have to update the local one
+            if (parser.incrementSequenceNumber()) {
+                if (connection.getExpectedStatusSequenceNumber().compareTo(parser.getStatusSequenceNumber()) >= 0) {
+                    connection.incrementExpectedStatusSequenceNumber();
+                } else {
+                    log.error("Status Sequence Number Mismatch (received, expected): " + parser.getStatusSequenceNumber() + ", " + (connection.getExpectedStatusSequenceNumber().getValue() - 1));
+                }
+
+            }
+        } else {
+            throw new InternetSCSIException(isCorrect);
         }
-        
-        return null;
+
+        return protocolDataUnit;
     }
 
     // --------------------------------------------------------------------------

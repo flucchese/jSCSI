@@ -26,13 +26,18 @@ import java.security.DigestException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.datasegment.AbstractDataSegment;
 import org.jscsi.parser.datasegment.IDataSegmentIterator.IDataSegmentChunk;
 import org.jscsi.parser.digest.IDigest;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 
 /**
@@ -44,15 +49,22 @@ import org.apache.log4j.LogManager;
  */
 public final class ProtocolDataUnit {
 
+    private static final Logger log = LogManager.getLogger(ProtocolDataUnit.class);
+
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
 
     /** The initial size of the Additional Header Segment. */
     private static final int AHS_INITIAL_SIZE = 0;
 
-    /** The Log interface. */
-    private static final Logger log = LogManager.getLogger(ProtocolDataUnit.class);
+    private static final ExecutorService transferExecutor;
 
+    private static final int TRANSFER_THREADS = 10;
+
+    static {
+    	transferExecutor = Executors.newFixedThreadPool(TRANSFER_THREADS);
+    }
+    
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
 
@@ -69,6 +81,18 @@ public final class ProtocolDataUnit {
      */
     private ByteBuffer dataSegment;
 
+    private boolean onGoingTransfer;
+    
+    private boolean basicHeaderReady;
+
+    private boolean additionalHeaderReady;
+
+    private boolean dataHeaderReady;
+
+    private Lock transferLock;
+    
+    private Condition transferCond;
+    
     /**
      * Optional header and data digests protect the integrity of the header and data, respectively. The digests, if
      * present, are located, respectively, after the header and PDU-specific data, and cover respectively the header and
@@ -100,14 +124,16 @@ public final class ProtocolDataUnit {
      * @param initDataDigest The instance of the digest to use for the Data Segment protection.
      */
     public ProtocolDataUnit (final IDigest initHeaderDigest, final IDigest initDataDigest) {
-
         basicHeaderSegment = new BasicHeaderSegment();
         headerDigest = initHeaderDigest;
 
-        additionalHeaderSegments = new ArrayList<AdditionalHeaderSegment>(AHS_INITIAL_SIZE);
+        additionalHeaderSegments = new ArrayList<>(AHS_INITIAL_SIZE);
 
         dataSegment = ByteBuffer.allocate(0);
         dataDigest = initDataDigest;
+        
+        transferLock = new ReentrantLock();
+        transferCond = transferLock.newCondition();
     }
 
     // --------------------------------------------------------------------------
@@ -120,8 +146,7 @@ public final class ProtocolDataUnit {
      * @throws InternetSCSIException If any violation of the iSCSI-Standard emerge.
      * @throws IOException if an I/O error occurs.
      */
-    public final ByteBuffer serialize () throws InternetSCSIException , IOException {
-
+    public final ByteBuffer serialize () throws InternetSCSIException {
         basicHeaderSegment.getParser().checkIntegrity();
 
         final ByteBuffer pdu = ByteBuffer.allocate(calcSize());
@@ -163,7 +188,6 @@ public final class ProtocolDataUnit {
      * @throws DigestException There is a mismatch of the digest.
      */
     public final int deserialize (final ByteBuffer pdu) throws InternetSCSIException , IOException , DigestException {
-
         int offset = deserializeBasicHeaderSegment(pdu);
 
         offset += deserializeAdditionalHeaderSegments(pdu, offset);
@@ -184,7 +208,6 @@ public final class ProtocolDataUnit {
      * @throws DigestException There is a mismatch of the digest.
      */
     private final int deserializeBasicHeaderSegment (final ByteBuffer bhs) throws InternetSCSIException , DigestException {
-
         int len = basicHeaderSegment.deserialize(this, bhs);
 
         // read header digest and validate
@@ -200,6 +223,23 @@ public final class ProtocolDataUnit {
     }
 
     /**
+     * Serialize all the contained additional header segments to the destination array starting from the given offset.
+     * 
+     * @param dst The destination array to write in.
+     * @param offset The offset to start to write in <code>dst</code>.
+     * @return The written length.
+     * @throws InternetSCSIException If any violation of the iSCSI-Standard emerge.
+     */
+    private final int serializeAdditionalHeaderSegments (final ByteBuffer dst, final int offset) throws InternetSCSIException {
+        int off = offset;
+        for (AdditionalHeaderSegment ahs : additionalHeaderSegments) {
+            off += ahs.serialize(dst, off);
+        }
+
+        return off - offset;
+    }
+
+    /**
      * Deserializes a array (starting from offset <code>0</code>) and store the informations to the
      * <code>AdditionalHeaderSegment</code> object.
      * 
@@ -208,7 +248,6 @@ public final class ProtocolDataUnit {
      * @throws InternetSCSIException If any violation of the iSCSI-Standard emerge.
      */
     private final int deserializeAdditionalHeaderSegments (final ByteBuffer pdu) throws InternetSCSIException {
-
         return deserializeAdditionalHeaderSegments(pdu, 0);
     }
 
@@ -222,7 +261,6 @@ public final class ProtocolDataUnit {
      * @throws InternetSCSIException If any violation of the iSCSI-Standard emerge.
      */
     private final int deserializeAdditionalHeaderSegments (final ByteBuffer pdu, final int offset) throws InternetSCSIException {
-
         // parsing Additional Header Segment
         int off = offset;
         int ahsLength = basicHeaderSegment.getTotalAHSLength();
@@ -240,24 +278,6 @@ public final class ProtocolDataUnit {
     }
 
     /**
-     * Serialize all the contained additional header segments to the destination array starting from the given offset.
-     * 
-     * @param dst The destination array to write in.
-     * @param offset The offset to start to write in <code>dst</code>.
-     * @return The written length.
-     * @throws InternetSCSIException If any violation of the iSCSI-Standard emerge.
-     */
-    private final int serializeAdditionalHeaderSegments (final ByteBuffer dst, final int offset) throws InternetSCSIException {
-
-        int off = offset;
-        for (AdditionalHeaderSegment ahs : additionalHeaderSegments) {
-            off += ahs.serialize(dst, off);
-        }
-
-        return off - offset;
-    }
-
-    /**
      * Serializes the data segment (binary or key-value pairs) to a destination array, staring from offset to write.
      * 
      * @param dst The array to write in.
@@ -266,7 +286,6 @@ public final class ProtocolDataUnit {
      * @throws InternetSCSIException If any violation of the iSCSI-Standard emerge.
      */
     public final int serializeDataSegment (final ByteBuffer dst, final int offset) throws InternetSCSIException {
-
         dataSegment.rewind();
         dst.position(offset);
         dst.put(dataSegment);
@@ -285,7 +304,6 @@ public final class ProtocolDataUnit {
      * @throws DigestException There is a mismatch of the digest.
      */
     private final int deserializeDataSegment (final ByteBuffer pdu, final int offset) throws IOException , InternetSCSIException , DigestException {
-
         final int length = basicHeaderSegment.getDataSegmentLength();
 
         if (dataSegment == null || dataSegment.limit() < length) {
@@ -319,7 +337,6 @@ public final class ProtocolDataUnit {
      * @throws IOException if an I/O error occurs.
      */
     public final int write (final SocketChannel sChannel) throws InternetSCSIException , IOException {
-
         // print debug informations
         if (log.isTraceEnabled()) {
             log.trace(basicHeaderSegment.getParser().getShortInfo());
@@ -344,53 +361,120 @@ public final class ProtocolDataUnit {
      * @throws InternetSCSIException if any violation of the iSCSI-Standard emerge.
      * @throws DigestException if a mismatch of the digest exists.
      */
-    public final boolean read (final SocketChannel sChannel) throws InternetSCSIException, DigestException, IOException {
+    public final void read (final SocketChannel sChannel) {
 
-        // read Basic Header Segment first to determine the total length of this
-        // Protocol Data Unit.
-        clear();
-
-        final ByteBuffer bhs = ByteBuffer.allocate(BasicHeaderSegment.BHS_FIXED_SIZE);
-        int len = 0;
-        while (len < BasicHeaderSegment.BHS_FIXED_SIZE) {
-            int lens = sChannel.read(bhs);
-            if (lens <= 0) {
-                return false;
+    	basicHeaderReady = false;
+    	additionalHeaderReady = false;
+    	dataHeaderReady = false;
+    	onGoingTransfer = true;
+    	
+    	transferExecutor.submit(() -> {
+    		try {
+	            // read Basic Header Segment first to determine the total length of this
+	            // Protocol Data Unit.
+	            clear();
+	
+	            final ByteBuffer bhs = ByteBuffer.allocate(BasicHeaderSegment.BHS_FIXED_SIZE);
+	            int len = 0;
+	            while (len < BasicHeaderSegment.BHS_FIXED_SIZE) {
+	                int lens = sChannel.read(bhs);
+	                if (lens <= 0) {
+	                    transferLock.lock();
+	                    try {
+	                    	onGoingTransfer = false;
+	                    	transferCond.signalAll();
+	                    } finally {
+	                        transferLock.unlock();
+	                    }
+	
+	                    return;
+	                }
+	                len += lens;
+	                log.trace("Receiving through SocketChannel: " + len + " of maximal " + BasicHeaderSegment.BHS_FIXED_SIZE);
+	
+	            }
+	            bhs.flip();
+	            deserializeBasicHeaderSegment(bhs);
+	
+	            transferLock.lock();
+	            try {
+	            	basicHeaderReady = true;
+	            	transferCond.signalAll();
+	            } finally {
+	                transferLock.unlock();
+	            }
+	            
+	            // print debug informations
+	            if (log.isTraceEnabled()) {
+	                log.trace(basicHeaderSegment.getParser().getShortInfo());
+	            }
+	
+	            // check for further reading
+	            if (getBasicHeaderSegment().getTotalAHSLength() > 0) {
+	                final ByteBuffer ahs = ByteBuffer.allocate(basicHeaderSegment.getTotalAHSLength());
+	                int ahsLength = 0;
+	                while (ahsLength < getBasicHeaderSegment().getTotalAHSLength()) {
+	                    ahsLength += sChannel.read(ahs);
+	                }
+	                ahs.flip();
+	
+	                deserializeAdditionalHeaderSegments(ahs);
+	                transferLock.lock();
+	                try {
+	                	additionalHeaderReady = true;
+	                	transferCond.signalAll();
+	                } finally {
+	                    transferLock.unlock();
+	                }
+	            }
+	            
+	            if (basicHeaderSegment.getDataSegmentLength() > 0) {
+	                transferLock.lock();
+	                try {
+	                	while (dataSegment == null) {
+		                	transferCond.awaitUninterruptibly();
+	                	};
+	                } finally {
+	                    transferLock.unlock();
+	                }
+	                int dataSegmentLength = 0;
+	                while (dataSegmentLength < basicHeaderSegment.getDataSegmentLength()) {
+	                    dataSegmentLength += sChannel.read(dataSegment);
+	                }
+	                dataSegment.flip();
+	                
+	                transferLock.lock();
+	                try {
+	                	dataHeaderReady = true;
+	                	transferCond.signalAll();
+	                } finally {
+	                    transferLock.unlock();
+	                }
+	            }
+    		} catch (IOException | InternetSCSIException | DigestException e) {
+    			log.warn("Problems receiving PDU", e);
+    		}
+            transferLock.lock();
+            try {
+            	onGoingTransfer = false;
+            	transferCond.signalAll();
+            } finally {
+                transferLock.unlock();
             }
-            len += lens;
-            log.trace("Receiving through SocketChannel: " + len + " of maximal " + BasicHeaderSegment.BHS_FIXED_SIZE);
+    	});
+    }
 
+    public final void writeToBuffer(ByteBuffer dataSegment) {
+        transferLock.lock();
+        try {
+            this.dataSegment = dataSegment;
+        	transferCond.signalAll();
+        	while (!dataHeaderReady && onGoingTransfer) {
+            	transferCond.awaitUninterruptibly();
+        	}
+        } finally {
+            transferLock.unlock();
         }
-        bhs.flip();
-
-        deserializeBasicHeaderSegment(bhs);
-
-        // check for further reading
-        if (getBasicHeaderSegment().getTotalAHSLength() > 0) {
-            final ByteBuffer ahs = ByteBuffer.allocate(basicHeaderSegment.getTotalAHSLength());
-            int ahsLength = 0;
-            while (ahsLength < getBasicHeaderSegment().getTotalAHSLength()) {
-                ahsLength += sChannel.read(ahs);
-            }
-            ahs.flip();
-
-            deserializeAdditionalHeaderSegments(ahs);
-        }
-        if (basicHeaderSegment.getDataSegmentLength() > 0) {
-            dataSegment = ByteBuffer.allocate(AbstractDataSegment.getTotalLength(basicHeaderSegment.getDataSegmentLength()));
-            int dataSegmentLength = 0;
-            while (dataSegmentLength < basicHeaderSegment.getDataSegmentLength()) {
-                dataSegmentLength += sChannel.read(dataSegment);
-            }
-            dataSegment.flip();
-        }
-
-        // print debug informations
-        if (log.isTraceEnabled()) {
-            log.trace(basicHeaderSegment.getParser().getShortInfo());
-        }
-        
-        return true;
     }
 
     /**
@@ -413,25 +497,41 @@ public final class ProtocolDataUnit {
     // --------------------------------------------------------------------------
 
     /**
-     * Returns an iterator to all contained Additional Header Segment in this PDU.
-     * 
-     * @return The iterator to the contained Additional Header Segment.
-     * @see AdditionalHeaderSegment
-     */
-    public final Iterator<AdditionalHeaderSegment> getAdditionalHeaderSegments () {
-
-        return additionalHeaderSegments.iterator();
-    }
-
-    /**
      * Returns the Basic Header Segment contained in this PDU.
      * 
      * @return The Basic Header Segment.
      * @see BasicHeaderSegment
      */
     public final BasicHeaderSegment getBasicHeaderSegment () {
+        transferLock.lock();
+        try {
+        	while (!basicHeaderReady && onGoingTransfer) {
+            	transferCond.awaitUninterruptibly();
+        	}
 
-        return basicHeaderSegment;
+        	return basicHeaderSegment;
+        } finally {
+            transferLock.unlock();
+        }
+    }
+
+    /**
+     * Returns an iterator to all contained Additional Header Segment in this PDU.
+     * 
+     * @return The iterator to the contained Additional Header Segment.
+     * @see AdditionalHeaderSegment
+     */
+    public final Iterator<AdditionalHeaderSegment> getAdditionalHeaderSegments () {
+        transferLock.lock();
+        try {
+        	while (!additionalHeaderReady && onGoingTransfer) {
+            	transferCond.awaitUninterruptibly();
+        	}
+
+        	return additionalHeaderSegments.iterator();
+        } finally {
+            transferLock.unlock();
+        }
     }
 
     /**
@@ -440,8 +540,18 @@ public final class ProtocolDataUnit {
      * @return The data segment of this <code>ProtocolDataUnit</code> object.
      */
     public final ByteBuffer getDataSegment () {
+        transferLock.lock();
+        try {
+            dataSegment = ByteBuffer.allocate(AbstractDataSegment.getTotalLength(basicHeaderSegment.getDataSegmentLength()));
+        	transferCond.signalAll();
+        	while (!dataHeaderReady && onGoingTransfer) {
+            	transferCond.awaitUninterruptibly();
+        	}
 
-        return dataSegment;
+        	return dataSegment;
+        } finally {
+            transferLock.unlock();
+        }
     }
 
     public final void setDataSegment (final ByteBuffer dataSegment) {
@@ -456,7 +566,6 @@ public final class ProtocolDataUnit {
      * @param chunk The new data segment of this <code>ProtocolDataUnit</code> object.
      */
     public final void setDataSegment (final IDataSegmentChunk chunk) {
-
         if (chunk == null) { throw new NullPointerException(); }
 
         dataSegment = ByteBuffer.allocate(chunk.getTotalLength());
@@ -470,7 +579,6 @@ public final class ProtocolDataUnit {
      * @return The instance of the header digest.
      */
     public final IDigest getHeaderDigest () {
-
         return headerDigest;
     }
 
@@ -480,7 +588,6 @@ public final class ProtocolDataUnit {
      * @param newHeaderDigest An instance of the new header digest.
      */
     public final void setHeaderDigest (final IDigest newHeaderDigest) {
-
         headerDigest = newHeaderDigest;
     }
 
@@ -490,7 +597,6 @@ public final class ProtocolDataUnit {
      * @return The instance of the data digest.
      */
     public final IDigest getDataDigest () {
-
         return dataDigest;
     }
 
@@ -500,7 +606,6 @@ public final class ProtocolDataUnit {
      * @param newDataDigest An instance of the new data segment digest.
      */
     public final void setDataDigest (final IDigest newDataDigest) {
-
         dataDigest = newDataDigest;
     }
 
@@ -606,5 +711,4 @@ public final class ProtocolDataUnit {
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
     // --------------------------------------------------------------------------
-
 }

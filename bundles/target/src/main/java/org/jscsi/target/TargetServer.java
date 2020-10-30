@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,22 +53,19 @@ public class TargetServer implements Callable<Void> {
     /**
      * Contains all active {@link TargetSession}s.
      */
-    private Collection<TargetSession> sessions = new Vector<>();
+    private Collection<TargetSession> sessions = new ArrayList<>();
 
     /**
      * The jSCSI Target's global parameters.
      */
     private Configuration config;
 
-    /**
-     * 
-     */
     private DeviceIdentificationVpdPage deviceIdentificationVpdPage;
 
     /**
      * The table of targets
      */
-    protected HashMap<String , Target> targets = new HashMap<>();
+    protected HashMap<String, Target> targets = new HashMap<>();
 
     /**
      * The thread pool.
@@ -87,8 +83,8 @@ public class TargetServer implements Callable<Void> {
      */
     private boolean running = true;
 
-    public TargetServer (final Configuration conf) {
-        this.config = conf;
+    public TargetServer(final Configuration conf) {
+        config = conf;
 
         log.debug("Starting jSCSI-target: ");
 
@@ -99,7 +95,6 @@ public class TargetServer implements Callable<Void> {
         // open the storage medium
         List<Target> targetInfo = getConfig().getTargets();
         for (Target curTargetInfo : targetInfo) {
-
             targets.put(curTargetInfo.getTargetName(), curTargetInfo);
             // print configuration and medium details
             log.debug("   target name:    " + curTargetInfo.getTargetName() + " loaded.");
@@ -117,7 +112,7 @@ public class TargetServer implements Callable<Void> {
      * @return the value to use in the next unreserved <code>Target Transfer Tag
      * </code> field
      */
-    public static int getNextTargetTransferTag () {
+    public static int getNextTargetTransferTag() {
         // value 0xffffffff is reserved
         int tag;
         do {
@@ -132,10 +127,10 @@ public class TargetServer implements Callable<Void> {
      * @param args all command line arguments are ignored
      * @throws IOException
      */
-    public static void main (String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         TargetServer target;
 
-        log.info("This system provides more than one IP Address to advertise.\n");
+        log.info("This system provides the following IP Address to advertise.\n");
 
         Enumeration<NetworkInterface> interfaceEnum = NetworkInterface.getNetworkInterfaces();
         NetworkInterface i;
@@ -179,7 +174,6 @@ public class TargetServer implements Callable<Void> {
                 target = new TargetServer(Configuration.create(targetAddress));
                 break;
             case 1 :
-
                 // Checking if the schema file is at the default location
                 target = new TargetServer(
                         Configuration.create(Configuration.CONFIGURATION_SCHEMA_FILE.exists() ?
@@ -211,33 +205,16 @@ public class TargetServer implements Callable<Void> {
                 targetConnection.call();
             } catch (Exception e) {
                 log.error("running target error:", e);
-            } finally {
-                // coming back from call() means the session is ended
-                // we can delete the target from local cache.
-                synchronized (targets) {
-                    Target target = targetConnection.getTargetSession().getTarget();
-                    if (target != null) {
-                        try {
-                            target.getStorageModule().close();
-                        } catch (Exception e) {
-                            log.error("Error when closing storage:", e);
-                        }
-                        log.info("closed local storage module");
-                    } else {
-                        log.warn("No target to delete on logout?");
-                    }
-                }
             }
+            
             return null;
         }
     }
 
     public Void call () throws Exception {
-
         // Create a blocking server socket and check for connections
         try {
-            // Create a blocking server socket channel on the specified/default
-            // port
+            // Create a blocking server socket channel on the specified/default port
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.configureBlocking(true);
 
@@ -270,18 +247,14 @@ public class TargetServer implements Callable<Void> {
                          * But since we don't do session reinstatement and
                          * MaxConnections=1, we can just create a new one.
                          */
-                        TargetSession session = new TargetSession(this, newConnection, initiatorSessionID, parser.getCommandSequenceNumber(),// set
-                                                                                                                                          // ExpCmdSN
-                                                                                                                                          // (PDU
-                                                                                                                                          // is
-                                                                                                                                          // immediate,
-                                                                                                                                          // hence
-                                                                                                                                          // no
-                                                                                                                                          // ++)
-                        parser.getExpectedStatusSequenceNumber());
+                        TargetSession session = new TargetSession(
+                        		this,
+                        		newConnection,
+                        		initiatorSessionID,
+                        		parser.getCommandSequenceNumber(), // set ExpCmdSN (PDU is immediate, hence no ++)
+                        		parser.getExpectedStatusSequenceNumber());
 
                         sessions.add(session);
-                        // threadPool.submit(connection);// ignore returned Future
                         workerPool.submit(new ConnectionHandler(newConnection)); // ignore returned Future
                     }
                 } catch (DigestException | InternetSCSIException | SettingsException e) {
@@ -346,14 +319,13 @@ public class TargetServer implements Callable<Void> {
     /**
      * Stop this target server
      */
-    public void stop(){
-        this.running = false;
-        for(TargetSession session : sessions){
-            if(!session.getConnection().stop()){
+    public void stop() {
+        running = false;
+        for (TargetSession session : sessions){
+            if (!session.getConnection().stop()){
                 this.running = true;
                 log.error("Unable to stop session for " + session.getTargetName());
             }
         }
     }
-
 }

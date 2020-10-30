@@ -165,7 +165,7 @@ public interface Connection extends Callable<Void> {
          * @throws IOException if the connection was closed
          * @throws SettingsException will not happen
          */
-        public ProtocolDataUnit receivePdu () throws DigestException , InternetSCSIException , IOException , SettingsException {
+        public ProtocolDataUnit receivePdu() throws DigestException, InternetSCSIException, IOException, SettingsException {
             lastReceivedPDU = senderWorker.receiveFromWire();
 
             if (lastReceivedPDU != null &&
@@ -192,7 +192,7 @@ public interface Connection extends Callable<Void> {
          * @throws IOException
          * @throws InternetSCSIException
          */
-        public void sendPdu (ProtocolDataUnit pdu) throws InterruptedException , IOException , InternetSCSIException {
+        public void sendPdu(ProtocolDataUnit pdu) throws InterruptedException , IOException , InternetSCSIException {
             senderWorker.sendOverWire(pdu);
         }
 
@@ -203,7 +203,7 @@ public interface Connection extends Callable<Void> {
          * received via {@link #receivePdu()}.
          * 
          */
-        public Void call () {
+        public Void call() {
             try {
                 // *** login phase ***
                 phase = new TargetLoginPhase(this);
@@ -238,7 +238,7 @@ public interface Connection extends Callable<Void> {
             return null;
         }
 
-        public TargetSession getTargetSession () {
+        public TargetSession getTargetSession() {
             return targetSession;
         }
 
@@ -248,7 +248,7 @@ public interface Connection extends Callable<Void> {
          * 
          * @return <code>true</code> if this is the leading connection
          */
-        public boolean isLeadingConnection () {
+        public boolean isLeadingConnection() {
             return isLeadingConnection;
         }
 
@@ -257,7 +257,7 @@ public interface Connection extends Callable<Void> {
          * <p>
          * This method must be be called after the this connection has been added to its session.
          */
-        public void initializeConnectionSettingsNegotiator (final SessionSettingsNegotiator sessionSettingsNegotiator) {
+        public void initializeConnectionSettingsNegotiator(final SessionSettingsNegotiator sessionSettingsNegotiator) {
             connectionSettingsNegotiator = new ConnectionSettingsNegotiator(sessionSettingsNegotiator);
         }
 
@@ -266,15 +266,15 @@ public interface Connection extends Callable<Void> {
          * 
          * @return the current {@link Settings}
          */
-        public Settings getSettings () {
+        public Settings getSettings() {
             return connectionSettingsNegotiator.getSettings();
         }
 
-        public ConnectionSettingsNegotiator getConnectionSettingsNegotiator () {
+        public ConnectionSettingsNegotiator getConnectionSettingsNegotiator() {
             return connectionSettingsNegotiator;
         }
 
-        public SerialArithmeticNumber getStatusSequenceNumber () {
+        public SerialArithmeticNumber getStatusSequenceNumber() {
             return statusSequenceNumber;
         }
 
@@ -282,7 +282,7 @@ public interface Connection extends Callable<Void> {
             this.statusSequenceNumber = new SerialArithmeticNumber(statusSequenceNumber);
         }
         
-        public boolean stop(){
+        public boolean stop() {
             if(phase instanceof TargetFullFeaturePhase){
                 ((TargetFullFeaturePhase)phase).stop();
                 return true;

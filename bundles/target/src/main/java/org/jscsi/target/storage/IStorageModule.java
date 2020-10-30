@@ -5,6 +5,7 @@ package org.jscsi.target.storage;
 
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.jscsi.target.scsi.cdb.CommandDescriptorBlock;
 
@@ -81,14 +82,16 @@ public interface IStorageModule {
      * @param storageIndex byte offset in the storage area
      * @throws IOException
      */
-    void write (byte[] bytes, long storageIndex) throws IOException;
+    void write(byte[] bytes, long storageIndex) throws IOException;
 
+    ByteBuffer getMappedBuffer(long startPosition, long length)  throws IOException;
+    
     /**
      * Closing the storage.
      * 
      * @throws IOException to be closed
      */
-    void close () throws IOException;
+    void close() throws IOException;
 
     /**
      * Get block size of underlying storage medium.

@@ -3,6 +3,8 @@ package org.jscsi.target.connection.stage.fullfeature;
 import java.io.IOException;
 import java.security.DigestException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.AbstractMessageParser;
 import org.jscsi.parser.BasicHeaderSegment;
@@ -22,8 +24,6 @@ import org.jscsi.target.scsi.cdb.Write6Cdb;
 import org.jscsi.target.scsi.cdb.WriteCdb;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.util.Debug;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 
 /**
@@ -70,7 +70,6 @@ public final class WriteStage extends ReadOrWriteStage {
 
     @Override
     public void execute (ProtocolDataUnit pdu) throws IOException , DigestException , InterruptedException , InternetSCSIException , SettingsException {
-
         log.debug("Entering WRITE STAGE");
 
         // get relevant values from settings
@@ -129,15 +128,11 @@ public final class WriteStage extends ReadOrWriteStage {
 
         // *** start receiving data (or process what has already been sent) ***
         int bytesReceived = 0;
-
+        int dataSegmentLength = bhs.getDataSegmentLength();
         // *** receive immediate data ***
-        if (immediateData && bhs.getDataSegmentLength() > 0) {
-            final byte[] immediateDataArray = pdu.getDataSegment().array();
-
-            session.getStorageModule().write(immediateDataArray, storageIndex);
-            bytesReceived = immediateDataArray.length;
-
-            log.debug("wrote " + immediateDataArray.length + "bytes as immediate data");
+        if (immediateData && dataSegmentLength > 0) {
+        	pdu.writeToBuffer(session.getStorageModule().getMappedBuffer(storageIndex, dataSegmentLength));
+            log.debug("wrote " + dataSegmentLength + "bytes as immediate data");
         }
 
         // *** receive unsolicited data ***
@@ -147,17 +142,16 @@ public final class WriteStage extends ReadOrWriteStage {
 
             boolean firstBurstOver = false;
             while (!firstBurstOver && bytesReceived <= firstBurstLength) {
-
                 // receive and check PDU
                 pdu = connection.receivePdu();
+                
                 bhs = pdu.getBasicHeaderSegment();
-
                 checkDataOutParser(bhs.getParser());
+                DataOutParser dataOutParser = (DataOutParser) bhs.getParser();
 
-                final DataOutParser dataOutParser = (DataOutParser) bhs.getParser();
+            	pdu.writeToBuffer(session.getStorageModule().getMappedBuffer(storageIndex + dataOutParser.getBufferOffset(),
+            																 bhs.getDataSegmentLength()));
 
-                session.getStorageModule().write(pdu.getDataSegment().array(), storageIndex + dataOutParser.getBufferOffset());
-                ;
                 bytesReceived += bhs.getDataSegmentLength();
 
                 if (bhs.isFinalFlag()) firstBurstOver = true;
@@ -172,7 +166,6 @@ public final class WriteStage extends ReadOrWriteStage {
             int desiredDataTransferLength;
 
             while (bytesReceived < transferLengthInBytes) {
-
                 desiredDataTransferLength = Math.min(maxBurstLength, transferLengthInBytes - bytesReceived);
 
                 // send R2T
@@ -189,14 +182,12 @@ public final class WriteStage extends ReadOrWriteStage {
                 boolean solicitedDataCycleOver = false;
                 int bytesReceivedThisCycle = 0;
                 while (!solicitedDataCycleOver) {
-
                     // receive and check PDU
                     pdu = connection.receivePdu();
+
                     bhs = pdu.getBasicHeaderSegment();
                     checkDataOutParser(bhs.getParser());
-
                     if (bhs.getParser() instanceof NOPOutParser) {
-
                         /* send SCSI Response PDU */
                         pdu = TargetPduFactory.createSCSIResponsePdu(false,// bidirectionalReadResidualOverflow
                                 false,// bidirectionalReadResidualUnderflow
@@ -215,7 +206,8 @@ public final class WriteStage extends ReadOrWriteStage {
                     } else if (bhs.getParser() instanceof DataOutParser) {
                         final DataOutParser dataOutParser = (DataOutParser) bhs.getParser();
 
-                        session.getStorageModule().write(pdu.getDataSegment().array(), storageIndex + dataOutParser.getBufferOffset());
+                    	pdu.writeToBuffer(session.getStorageModule().getMappedBuffer(storageIndex + dataOutParser.getBufferOffset(),
+								 													 bhs.getDataSegmentLength()));
 
                         bytesReceivedThisCycle += bhs.getDataSegmentLength();
 
