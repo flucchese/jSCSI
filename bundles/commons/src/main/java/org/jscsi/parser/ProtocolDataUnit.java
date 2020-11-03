@@ -360,7 +360,6 @@ public final class ProtocolDataUnit {
         while (length < headers.limit()) {
             length += sChannel.write(headers);
         }
-        log.debug(length+" bytes written for the headers");
 
         // Send data segment
         length = 0;
@@ -368,14 +367,12 @@ public final class ProtocolDataUnit {
         while (length < dataSegment.limit()) {
             length += sChannel.write(dataSegment);
         }
-        log.debug(length+" bytes written for the data");
 
         ByteBuffer padding = ByteBuffer.allocate(AbstractDataSegment.calcPadding(length));
         length = 0;
         while (length < padding.limit()) {
             length += sChannel.write(padding);
         }
-        log.debug(length+" bytes written for the data padding");
 
         // Send data segment digest, if needed
         if (basicHeaderSegment.getParser().canHaveDigests()) {

@@ -173,7 +173,7 @@ public final class BasicHeaderSegment {
      */
     final int deserialize (final ProtocolDataUnit protocolDataUnit, final ByteBuffer src) throws InternetSCSIException {
 
-        if (src.remaining() < BHS_FIXED_SIZE) { throw new InternetSCSIException("This Protocol Data Unit does not contain" + " an valid Basic Header Segment."); }
+        if (src.remaining() < BHS_FIXED_SIZE) { throw new InternetSCSIException("This Protocol Data Unit does not contain a valid Basic Header Segment."); }
 
         final int firstLine = src.getInt();
         immediateFlag = Utils.isBitSet(firstLine & IMMEDIATE_FLAG_MASK);
