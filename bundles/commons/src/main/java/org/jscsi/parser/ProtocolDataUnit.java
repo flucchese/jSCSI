@@ -409,6 +409,7 @@ public final class ProtocolDataUnit {
     	
     	transferExecutor.submit(() -> {
     		try {
+    			log.debug("Starting read thread for channel "+sChannel);
 	            // read Basic Header Segment first to determine the total length of this
 	            // Protocol Data Unit.
 	            clear();
@@ -416,21 +417,10 @@ public final class ProtocolDataUnit {
 	            final ByteBuffer bhs = ByteBuffer.allocate(BasicHeaderSegment.BHS_FIXED_SIZE);
 	            int len = 0;
 	            while (len < BasicHeaderSegment.BHS_FIXED_SIZE) {
-	                int lens = sChannel.read(bhs);
-	                if (lens <= 0) {
-	                    readLock.lock();
-	                    try {
-	                    	onGoingRead = false;
-	                    	readCond.signalAll();
-	                    } finally {
-	                        readLock.unlock();
-	                    }
-	
-	                    return;
-	                }
-	                len += lens;
-	                log.trace("Receiving through SocketChannel: " + len + " of maximal " + BasicHeaderSegment.BHS_FIXED_SIZE);
+	                len += sChannel.read(bhs);
+	                log.debug(String.format("Receiving through SocketChannel: %d of maximal %d.", len, BasicHeaderSegment.BHS_FIXED_SIZE));
 	            }
+    			log.debug("Basic header read. Deserializing it...");
 	            bhs.flip();
 	            deserializeBasicHeaderSegmentAndDigest(bhs);
 	
@@ -441,6 +431,7 @@ public final class ProtocolDataUnit {
 	            } finally {
 	                readLock.unlock();
 	            }
+    			log.debug("Basic header ready.");
 	            
 	            // print debug informations
 	            if (log.isTraceEnabled()) {
@@ -454,6 +445,7 @@ public final class ProtocolDataUnit {
 	                while (ahsLength < getBasicHeaderSegment().getTotalAHSLength()) {
 	                    ahsLength += sChannel.read(ahs);
 	                }
+	    			log.debug("Additional header read. Deserializing it...");
 	                ahs.flip();
 	
 	                deserializeAdditionalHeaderSegments(ahs);
@@ -464,21 +456,26 @@ public final class ProtocolDataUnit {
 	                } finally {
 	                    readLock.unlock();
 	                }
+	    			log.debug("Additional header ready.");
 	            }
 	            
 	            if (basicHeaderSegment.getDataSegmentLength() > 0) {
 	                readLock.lock();
 	                try {
 	                	while (dataSegment == null) {
+	    	    			log.debug("Waiting for data segment buffer...");
 		                	readCond.awaitUninterruptibly();
+	    	    			log.debug("Data segment buffer set.");
 	                	};
 	                } finally {
 	                    readLock.unlock();
 	                }
 	                int dataSegmentLength = 0;
+	    			log.debug("Starting to read data segment...");
 	                while (dataSegmentLength < basicHeaderSegment.getDataSegmentLength()) {
 	                    dataSegmentLength += sChannel.read(dataSegment);
 	                }
+	    			log.debug("Data segment read.");
 	                dataSegment.flip();
 	                
 	                readLock.lock();
@@ -488,6 +485,7 @@ public final class ProtocolDataUnit {
 	                } finally {
 	                    readLock.unlock();
 	                }
+	    			log.debug("Data segment ready.");
 	            }
     		} catch (IOException | InternetSCSIException e) {
     			log.warn("Problems receiving PDU", e);
@@ -507,9 +505,7 @@ public final class ProtocolDataUnit {
         try {
             this.dataSegment = dataSegment;
         	readCond.signalAll();
-        	while (!dataHeaderReady && onGoingRead) {
-            	readCond.awaitUninterruptibly();
-        	}
+			log.debug("Setting mapped buffer for data segment.");
         } finally {
             readLock.unlock();
         }

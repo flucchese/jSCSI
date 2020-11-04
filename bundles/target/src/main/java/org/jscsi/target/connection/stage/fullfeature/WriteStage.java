@@ -134,13 +134,12 @@ public final class WriteStage extends ReadOrWriteStage {
         if (immediateData && dataSegmentLength > 0) {
         	pdu.writeToBuffer(session.getStorageModule().getMappedBuffer(storageIndex, dataSegmentLength));
         	bytesReceived += dataSegmentLength;
-            log.debug("wrote " + dataSegmentLength + " bytes as immediate data");
+            log.debug("Writing " + dataSegmentLength + " bytes as immediate data");
         }
 
         // *** receive unsolicited data ***
         if (!initialR2T && !bhs.isFinalFlag()) {
             log.debug("receiving unsolicited data");
-
             boolean firstBurstOver = false;
             while (!firstBurstOver && bytesReceived <= firstBurstLength) {
                 // receive and check PDU
@@ -161,12 +160,12 @@ public final class WriteStage extends ReadOrWriteStage {
 
         // *** receive solicited data ***
         if (bytesReceived < transferLengthInBytes) {
-            log.debug(String.format("Bytes received (%d) < transfer length (%d)", bytesReceived, transferLengthInBytes));
-
             int readyToTransferSequenceNumber = 0;
             int desiredDataTransferLength;
 
             while (bytesReceived < transferLengthInBytes) {
+                log.debug(String.format("Bytes received (%d) < transfer length (%d)", bytesReceived, transferLengthInBytes));
+
                 desiredDataTransferLength = Math.min(maxBurstLength, transferLengthInBytes - bytesReceived);
 
                 // send R2T

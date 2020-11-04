@@ -160,7 +160,7 @@ public class TargetSenderWorker {
         }
 
         // increment CmdSN if not immediate PDU (or Data-Out PDU)
-        if (parser.incrementSequenceNumber()) {
+        if (parser != null && parser.incrementSequenceNumber()) {
         	session.getExpectedCommandSequenceNumber().increment();
         }
 
