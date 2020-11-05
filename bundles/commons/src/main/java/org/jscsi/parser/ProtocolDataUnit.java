@@ -25,7 +25,9 @@ import java.nio.channels.SocketChannel;
 import java.security.DigestException;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
@@ -57,12 +59,21 @@ public final class ProtocolDataUnit {
     /** The initial size of the Additional Header Segment. */
     private static final int AHS_INITIAL_SIZE = 0;
 
+    private static final int TRANSFER_THREADS = 10;
+
     private static final ExecutorService transferExecutor;
 
-    private static final int TRANSFER_THREADS = 10;
+    private static final Set<SocketChannel> blockedSockets;
+    
+    private static final Lock semaphorsLock;
+
+    private static final Condition semaphorsCond;
 
     static {
     	transferExecutor = Executors.newFixedThreadPool(TRANSFER_THREADS);
+    	blockedSockets = new HashSet<>();
+    	semaphorsLock = new ReentrantLock();
+    	semaphorsCond = semaphorsLock.newCondition();
     }
     
     // --------------------------------------------------------------------------
@@ -82,7 +93,6 @@ public final class ProtocolDataUnit {
     private ByteBuffer dataSegment;
 
     private boolean onGoingRead;
-    private boolean basicHeaderReady;
     private boolean additionalHeaderReady;
     private boolean dataHeaderReady;
 
@@ -402,94 +412,112 @@ public final class ProtocolDataUnit {
      * @throws DigestException if a mismatch of the digest exists.
      */
     public final void read(final SocketChannel sChannel) {
-    	basicHeaderReady = false;
-    	additionalHeaderReady = false;
     	dataHeaderReady = false;
     	onGoingRead = true;
+
+    	// Wait if current socket is being used by another reading thread
+    	semaphorsLock.lock();
+    	try {
+       		while (blockedSockets.contains(sChannel)) {
+       			semaphorsCond.awaitUninterruptibly();
+       		}
+       		blockedSockets.add(sChannel);
+    	} finally {
+        	semaphorsLock.unlock();
+    	}
     	
-    	transferExecutor.submit(() -> {
-    		try {
-    			log.debug("Starting read thread for channel "+sChannel);
-	            // read Basic Header Segment first to determine the total length of this
-	            // Protocol Data Unit.
-	            clear();
-	
-	            final ByteBuffer bhs = ByteBuffer.allocate(BasicHeaderSegment.BHS_FIXED_SIZE);
-	            int len = 0;
-	            while (len < BasicHeaderSegment.BHS_FIXED_SIZE) {
-	                len += sChannel.read(bhs);
-	                log.debug(String.format("Receiving through SocketChannel: %d of maximal %d.", len, BasicHeaderSegment.BHS_FIXED_SIZE));
-	            }
-    			log.debug("Basic header read. Deserializing it...");
-	            bhs.flip();
-	            deserializeBasicHeaderSegmentAndDigest(bhs);
-	
+		log.trace("Starting synchronous read at channel "+sChannel);
+        // read Basic Header Segment first to determine the total length of this
+        // Protocol Data Unit.
+        clear();
+
+		try {
+	        final ByteBuffer bhs = ByteBuffer.allocate(BasicHeaderSegment.BHS_FIXED_SIZE);
+	        int len = 0;
+	        while (len < BasicHeaderSegment.BHS_FIXED_SIZE) {
+	            len += sChannel.read(bhs);
+	        }
+	        bhs.flip();
+	        deserializeBasicHeaderSegmentAndDigest(bhs);
+
+	        // print debug informations
+	        if (log.isTraceEnabled()) {
+	            log.trace(basicHeaderSegment.getParser().getShortInfo());
+	        }
+	        
+	    	transferExecutor.submit(() -> {
+	    		try {
+	    			log.trace("Starting asynchronous read at channel "+sChannel);
+
+	    			// check for further reading
+	    	        if (getBasicHeaderSegment().getTotalAHSLength() > 0) {
+	    	            final ByteBuffer ahs = ByteBuffer.allocate(basicHeaderSegment.getTotalAHSLength());
+	    	            int ahsLength = 0;
+	    	            while (ahsLength < getBasicHeaderSegment().getTotalAHSLength()) {
+	    	                ahsLength += sChannel.read(ahs);
+	    	            }
+	    				log.trace("Additional header read. Deserializing it...");
+	    	            ahs.flip();
+
+	    	            deserializeAdditionalHeaderSegments(ahs);
+	    	            readLock.lock();
+	    	            try {
+	    	            	additionalHeaderReady = true;
+	    	            	readCond.signalAll();
+	    	            } finally {
+	    	                readLock.unlock();
+	    	            }
+	    				log.trace("Additional header ready.");
+	    	        }
+
+	    	        if (basicHeaderSegment.getDataSegmentLength() > 0) {
+		                readLock.lock();
+		                try {
+		                	while (dataSegment == null) {
+		    	    			log.trace("Waiting for data segment buffer...");
+			                	readCond.awaitUninterruptibly();
+		                	};
+	    	    			log.trace("Data segment buffer set.");
+		                } finally {
+		                    readLock.unlock();
+		                }
+		                int dataSegmentLength = 0;
+		    			log.trace("Starting to read data segment...");
+		                while (dataSegmentLength < basicHeaderSegment.getDataSegmentLength()) {
+		                    dataSegmentLength += sChannel.read(dataSegment);
+		                }
+		    			log.trace("Data segment read.");
+		                dataSegment.flip();
+		                
+		                readLock.lock();
+		                try {
+		                	dataHeaderReady = true;
+		                	readCond.signalAll();
+		                } finally {
+		                    readLock.unlock();
+		                }
+		    			log.trace("Data segment ready.");
+		            }
+	    		} catch (IOException | InternetSCSIException e) {
+	    			log.warn("Problems receiving PDU", e);
+	    		}
 	            readLock.lock();
 	            try {
-	            	basicHeaderReady = true;
+	            	onGoingRead = false;
 	            	readCond.signalAll();
 	            } finally {
 	                readLock.unlock();
 	            }
-    			log.debug("Basic header ready.");
-	            
-	            // print debug informations
-	            if (log.isTraceEnabled()) {
-	                log.trace(basicHeaderSegment.getParser().getShortInfo());
-	            }
-	
-	            // check for further reading
-	            if (getBasicHeaderSegment().getTotalAHSLength() > 0) {
-	                final ByteBuffer ahs = ByteBuffer.allocate(basicHeaderSegment.getTotalAHSLength());
-	                int ahsLength = 0;
-	                while (ahsLength < getBasicHeaderSegment().getTotalAHSLength()) {
-	                    ahsLength += sChannel.read(ahs);
-	                }
-	    			log.debug("Additional header read. Deserializing it...");
-	                ahs.flip();
-	
-	                deserializeAdditionalHeaderSegments(ahs);
-	                readLock.lock();
-	                try {
-	                	additionalHeaderReady = true;
-	                	readCond.signalAll();
-	                } finally {
-	                    readLock.unlock();
-	                }
-	    			log.debug("Additional header ready.");
-	            }
-	            
-	            if (basicHeaderSegment.getDataSegmentLength() > 0) {
-	                readLock.lock();
-	                try {
-	                	while (dataSegment == null) {
-	    	    			log.debug("Waiting for data segment buffer...");
-		                	readCond.awaitUninterruptibly();
-	    	    			log.debug("Data segment buffer set.");
-	                	};
-	                } finally {
-	                    readLock.unlock();
-	                }
-	                int dataSegmentLength = 0;
-	    			log.debug("Starting to read data segment...");
-	                while (dataSegmentLength < basicHeaderSegment.getDataSegmentLength()) {
-	                    dataSegmentLength += sChannel.read(dataSegment);
-	                }
-	    			log.debug("Data segment read.");
-	                dataSegment.flip();
-	                
-	                readLock.lock();
-	                try {
-	                	dataHeaderReady = true;
-	                	readCond.signalAll();
-	                } finally {
-	                    readLock.unlock();
-	                }
-	    			log.debug("Data segment ready.");
-	            }
-    		} catch (IOException | InternetSCSIException e) {
-    			log.warn("Problems receiving PDU", e);
-    		}
+	        	semaphorsLock.lock();
+	        	try {
+	           		blockedSockets.remove(sChannel);
+	           		semaphorsCond.signalAll();
+	        	} finally {
+	            	semaphorsLock.unlock();
+	        	}
+	    	});
+		} catch (IOException | InternetSCSIException e) {
+			log.warn("Problems receiving PDU", e);
             readLock.lock();
             try {
             	onGoingRead = false;
@@ -497,15 +525,22 @@ public final class ProtocolDataUnit {
             } finally {
                 readLock.unlock();
             }
-    	});
+        	semaphorsLock.lock();
+        	try {
+           		blockedSockets.remove(sChannel);
+           		semaphorsCond.signalAll();
+        	} finally {
+            	semaphorsLock.unlock();
+        	}
+		}
     }
 
     public final void writeToBuffer(ByteBuffer dataSegment) {
         readLock.lock();
         try {
             this.dataSegment = dataSegment;
+			log.trace("Setting mapped buffer for data segment.");
         	readCond.signalAll();
-			log.debug("Setting mapped buffer for data segment.");
         } finally {
             readLock.unlock();
         }
@@ -537,16 +572,7 @@ public final class ProtocolDataUnit {
      * @see BasicHeaderSegment
      */
     public final BasicHeaderSegment getBasicHeaderSegment () {
-        readLock.lock();
-        try {
-        	while (!basicHeaderReady && onGoingRead) {
-            	readCond.awaitUninterruptibly();
-        	}
-
-        	return basicHeaderSegment;
-        } finally {
-            readLock.unlock();
-        }
+       	return basicHeaderSegment;
     }
 
     /**
