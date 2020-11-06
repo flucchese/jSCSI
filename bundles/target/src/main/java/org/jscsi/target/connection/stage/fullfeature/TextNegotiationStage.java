@@ -37,7 +37,7 @@ public final class TextNegotiationStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
 
@@ -133,6 +133,8 @@ public final class TextNegotiationStage extends TargetFullFeatureStage {
                 replyDataSegment);// dataSegment
 
         connection.sendPdu(responsePdu);
+        
+        return null;
     }
 
 }

@@ -33,7 +33,7 @@ public class SendDiagnosticStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
         final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
@@ -79,6 +79,8 @@ public class SendDiagnosticStage extends TargetFullFeatureStage {
 
         // send response
         connection.sendPdu(responsePdu);
+        
+        return null;
     }
 
 }

@@ -35,7 +35,7 @@ public class InquiryStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
         final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
@@ -62,7 +62,6 @@ public class InquiryStage extends TargetFullFeatureStage {
 
             // send response
             connection.sendPdu(responsePdu);
-
         } else {
             // PDU is okay
             // carry out command
@@ -96,9 +95,8 @@ public class InquiryStage extends TargetFullFeatureStage {
 
             // send response
             sendResponse(bhs.getInitiatorTaskTag(), parser.getExpectedDataTransferLength(), responseData);
-           
         }
-
+        
+        return null;
     }
-
 }

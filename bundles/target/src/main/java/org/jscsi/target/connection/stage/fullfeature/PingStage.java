@@ -36,7 +36,7 @@ public class PingStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (final ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (final ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
         final NOPOutParser parser = (NOPOutParser) bhs.getParser();
@@ -52,7 +52,7 @@ public class PingStage extends TargetFullFeatureStage {
         }
 
         // decide whether or not response is necessary
-        if (bhs.getInitiatorTaskTag() == RESERVED_TAG_VALUE) return;// send no response
+        if (bhs.getInitiatorTaskTag() == RESERVED_TAG_VALUE) return null;// send no response
 
         // else
         // prepare response data segment (copy up to initiator's
@@ -70,6 +70,8 @@ public class PingStage extends TargetFullFeatureStage {
                 RESERVED_TAG_VALUE,// targetTransferTag
                 responseDataSegment, parser.getExpectedStatusSequenceNumber());
         connection.sendPdu(responsePdu);
+        
+        return null;
     }
 
 }

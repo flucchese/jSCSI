@@ -55,7 +55,7 @@ public class FormatUnitStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         log.debug("Initiator has sent FORMAT UNIT command.");
 
@@ -123,6 +123,8 @@ public class FormatUnitStage extends TargetFullFeatureStage {
 
         // send response
         connection.sendPdu(responsePdu);
+        
+        return null;
     }
 
 }

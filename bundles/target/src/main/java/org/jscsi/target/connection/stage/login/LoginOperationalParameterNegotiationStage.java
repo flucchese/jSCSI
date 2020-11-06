@@ -37,7 +37,7 @@ public final class LoginOperationalParameterNegotiationStage extends TargetLogin
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , IllegalArgumentException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , IllegalArgumentException , SettingsException {
         log.debug("Entering LOPN Stage");
 
         BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
@@ -52,7 +52,7 @@ public final class LoginOperationalParameterNegotiationStage extends TargetLogin
             // negotiation failure, no exception
             sendRejectPdu(LoginStatus.INITIATOR_ERROR);
             // nextStageNumber = null;//no change
-            return;
+            return null;
         }
 
         // print request and response key value pairs if debugging
@@ -85,5 +85,7 @@ public final class LoginOperationalParameterNegotiationStage extends TargetLogin
         sendPduSequence(keyValuePairReply, LoginStage.FULL_FEATURE_PHASE);
         negotiator.finishNegotiation(true);
         nextStageNumber = LoginStage.FULL_FEATURE_PHASE;
+        
+        return null;
     }
 }

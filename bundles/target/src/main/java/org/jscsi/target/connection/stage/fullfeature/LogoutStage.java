@@ -28,7 +28,7 @@ public final class LogoutStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute(ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
         final int initiatorTaskTag = bhs.getInitiatorTaskTag();
@@ -37,6 +37,8 @@ public final class LogoutStage extends TargetFullFeatureStage {
                 (short) settings.getDefaultTime2Retain());// time2Retain
 
         connection.sendPdu(responsePDU);
+        
+        return null;
     }
 
 }

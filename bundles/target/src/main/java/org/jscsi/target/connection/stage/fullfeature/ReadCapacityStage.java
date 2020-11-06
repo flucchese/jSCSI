@@ -31,7 +31,7 @@ public final class ReadCapacityStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         // find out the type of READ CAPACITY command ((10) or (16))
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
@@ -70,7 +70,8 @@ public final class ReadCapacityStage extends TargetFullFeatureStage {
                     bhs.getInitiatorTaskTag(),// initiatorTaskTag
                     parser.getExpectedDataTransferLength());// expectedDataTransferLength
             connection.sendPdu(responsePdu);
-            return;
+
+            return null;
         } else {
             // send PDU with requested READ CAPACITY parameter data
             ReadCapacityParameterData parameterData;
@@ -85,6 +86,7 @@ public final class ReadCapacityStage extends TargetFullFeatureStage {
                     parser.getExpectedDataTransferLength(),// expectedDataTransferLength,
                     parameterData);// responseData
         }
+        
+        return null;
     }
-
 }

@@ -79,8 +79,14 @@ public final class TargetFullFeaturePhase extends TargetPhase {
     public boolean execute () throws DigestException , IOException , InterruptedException , InternetSCSIException , SettingsException {
 
         running = true;
+        ProtocolDataUnit returnedPdu = null;
         while (running) {
-            ProtocolDataUnit pdu = connection.receivePdu();
+            ProtocolDataUnit pdu = null;
+            if (returnedPdu != null) {
+            	pdu = returnedPdu;
+            } else {
+            	pdu = connection.receivePdu();
+            }
             
             if (pdu == null) {
             	log.debug("Received an empty pdu. Bailing out...");
@@ -182,7 +188,7 @@ public final class TargetFullFeaturePhase extends TargetPhase {
             }
 
             // process the PDU
-            stage.execute(pdu);
+            returnedPdu = stage.execute(pdu);
         }
 
         return false;

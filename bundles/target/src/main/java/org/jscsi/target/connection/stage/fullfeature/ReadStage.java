@@ -35,7 +35,7 @@ public class ReadStage extends ReadOrWriteStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , SettingsException {
 
         // get relevant variables ...
         // ... from settings
@@ -75,7 +75,8 @@ public class ReadStage extends ReadOrWriteStage {
             final ProtocolDataUnit responsePdu = createFixedFormatErrorPdu(cdb.getIllegalFieldPointers(),// senseKeySpecificData
                     initiatorTaskTag, parser.getExpectedDataTransferLength());
             connection.sendPdu(responsePdu);
-            return;
+
+            return null;
         }
 
         final int totalTransferLength = session.getStorageModule().getBlockSize() * cdb.getTransferLength();
@@ -179,5 +180,7 @@ public class ReadStage extends ReadOrWriteStage {
             log.debug("sending SCSI Response PDU");
             connection.sendPdu(responsePdu);
         }
+        
+        return null;
     }
 }

@@ -6,6 +6,8 @@ import java.security.DigestException;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jscsi.exception.InternetSCSIException;
 import org.jscsi.parser.BasicHeaderSegment;
 import org.jscsi.parser.ProtocolDataUnit;
@@ -15,8 +17,6 @@ import org.jscsi.target.connection.phase.TargetLoginPhase;
 import org.jscsi.target.settings.SettingsException;
 import org.jscsi.target.settings.TextKeyword;
 import org.jscsi.target.settings.TextParameter;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 
 /**
@@ -38,7 +38,7 @@ public final class SecurityNegotiationStage extends TargetLoginStage {
     }
 
     @Override
-    public void execute (ProtocolDataUnit initialPdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (ProtocolDataUnit initialPdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         // "receive" initial PDU
         BasicHeaderSegment bhs = initialPdu.getBasicHeaderSegment();
@@ -139,19 +139,21 @@ public final class SecurityNegotiationStage extends TargetLoginStage {
                     // leave this (and proceed to next) stage
                     if (requestedNextStageNumber == LoginStage.LOGIN_OPERATIONAL_NEGOTIATION || requestedNextStageNumber == LoginStage.FULL_FEATURE_PHASE) {
                         nextStageNumber = requestedNextStageNumber;
-                        return;
+                        return null;
                     }
                 } else {
                     // TODO support CHAP (and use String
                     // authMethodKeyValuePairs)
                     log.error("initiator attempted CHAP authentication");
                     // nextStageNumber = null;//no change
-                    return;
+                    return null;
                 }
 
             }
 
         } while (!bhs.isFinalFlag() && !authenticated);
+        
+        return null;
     }
 
     /**

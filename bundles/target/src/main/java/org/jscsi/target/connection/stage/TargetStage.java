@@ -68,7 +68,7 @@ public abstract class TargetStage {
      * @throws SettingsException if the program has attempted to access a value from settings which has not been
      *             negotiated and which does not have a default value
      */
-    public abstract void execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException;
+    public abstract ProtocolDataUnit execute (ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException;
 
     /**
      * Getting connection of this stage.

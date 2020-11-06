@@ -36,7 +36,7 @@ public final class ModeSenseStage extends TargetFullFeatureStage {
     }
 
     @Override
-    public void execute (final ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
+    public ProtocolDataUnit execute (final ProtocolDataUnit pdu) throws IOException , InterruptedException , InternetSCSIException , DigestException , SettingsException {
 
         final BasicHeaderSegment bhs = pdu.getBasicHeaderSegment();
         final SCSICommandParser parser = (SCSICommandParser) bhs.getParser();
@@ -85,7 +85,6 @@ public final class ModeSenseStage extends TargetFullFeatureStage {
             sendResponse(bhs.getInitiatorTaskTag(),// initiatorTaskTag,
                     parser.getExpectedDataTransferLength(),// expectedDataTransferLength,
                     modeParameterList);// responseData
-
         } else {
             /*
              * The initiator has requested a mode sense page which the jSCSI Target cannot provide. This could be
@@ -95,6 +94,7 @@ public final class ModeSenseStage extends TargetFullFeatureStage {
             throw new InternetSCSIException();
         }
 
+        return null;
     }
 
     private static final InformationExceptionsControlModePage getInformationExceptionsControlModePage () {
