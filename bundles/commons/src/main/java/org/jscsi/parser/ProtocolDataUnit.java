@@ -135,7 +135,6 @@ public final class ProtocolDataUnit {
 
         additionalHeaderSegments = new ArrayList<>(AHS_INITIAL_SIZE);
 
-        dataSegment = ByteBuffer.allocate(0);
         dataDigest = initDataDigest;
         
         readLock = new ReentrantLock();
@@ -359,11 +358,6 @@ public final class ProtocolDataUnit {
      * @throws DigestException 
      */
     public final int write(SocketChannel sChannel) throws InternetSCSIException, IOException {
-        // print debug informations
-        if (log.isTraceEnabled()) {
-            log.trace(basicHeaderSegment.getParser().getShortInfo());
-        }
-
         // Send headers
         ByteBuffer headers = serialize(false);
         int length = 0;
@@ -440,11 +434,6 @@ public final class ProtocolDataUnit {
 	        bhs.flip();
 	        deserializeBasicHeaderSegmentAndDigest(bhs);
 
-	        // print debug informations
-	        if (log.isTraceEnabled()) {
-	            log.trace(basicHeaderSegment.getParser().getShortInfo());
-	        }
-	        
 	    	transferExecutor.submit(() -> {
 	    		try {
 	    			log.trace("Starting asynchronous read at channel "+sChannel);
