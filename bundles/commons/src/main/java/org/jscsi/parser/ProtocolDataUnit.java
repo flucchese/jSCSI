@@ -367,30 +367,32 @@ public final class ProtocolDataUnit {
 
         // Send data segment
         length = 0;
-        dataSegment.rewind();
-        while (length < dataSegment.limit()) {
-            length += sChannel.write(dataSegment);
-        }
+        if (dataSegment != null) {
+            dataSegment.rewind();
+            while (length < dataSegment.limit()) {
+                length += sChannel.write(dataSegment);
+            }
 
-        ByteBuffer padding = ByteBuffer.allocate(AbstractDataSegment.calcPadding(length));
-        length = 0;
-        while (length < padding.limit()) {
-            length += sChannel.write(padding);
-        }
-
-        // Send data segment digest, if needed
-        if (basicHeaderSegment.getParser().canHaveDigests()) {
-        	dataSegment.rewind();
-        	if (calculateDigest(dataSegment, 0, dataSegment.limit(), dataDigest)) {
-                ByteBuffer dataDigestBuffer = ByteBuffer.allocate(dataDigest.getSize());
-                dataDigestBuffer.putInt((int) headerDigest.getValue());
-                dataDigestBuffer.rewind();
-                length = 0;
-                while (length < dataDigestBuffer.limit()) {
-                    length += sChannel.write(dataDigestBuffer);
-                }
-                log.debug(length+" bytes written for the data digest");
-        	}
+	        ByteBuffer padding = ByteBuffer.allocate(AbstractDataSegment.calcPadding(length));
+	        length = 0;
+	        while (length < padding.limit()) {
+	            length += sChannel.write(padding);
+	        }
+	
+	        // Send data segment digest, if needed
+	        if (basicHeaderSegment.getParser().canHaveDigests()) {
+	        	dataSegment.rewind();
+	        	if (calculateDigest(dataSegment, 0, dataSegment.limit(), dataDigest)) {
+	                ByteBuffer dataDigestBuffer = ByteBuffer.allocate(dataDigest.getSize());
+	                dataDigestBuffer.putInt((int) headerDigest.getValue());
+	                dataDigestBuffer.rewind();
+	                length = 0;
+	                while (length < dataDigestBuffer.limit()) {
+	                    length += sChannel.write(dataDigestBuffer);
+	                }
+	                log.debug(length+" bytes written for the data digest");
+	        	}
+	        }
         }
 
         return length;
@@ -544,9 +546,6 @@ public final class ProtocolDataUnit {
         headerDigest.reset();
 
         additionalHeaderSegments.clear();
-
-        dataSegment.clear();
-        dataSegment.flip();
 
         dataDigest.reset();
     }
