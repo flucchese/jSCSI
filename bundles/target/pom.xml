@@ -92,26 +92,6 @@
          <artifactId>commons</artifactId>
          <version>2.6.1-SNAPSHOT</version>
       </dependency>
-      <dependency>
-         <groupId>org.apache.jclouds</groupId>
-         <artifactId>jclouds-blobstore</artifactId>
-         <version>${jclouds.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.jclouds.provider</groupId>
-         <artifactId>aws-s3</artifactId>
-         <version>${jclouds.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.jclouds.api</groupId>
-         <artifactId>filesystem</artifactId>
-         <version>${jclouds.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.osgi</groupId>
-         <artifactId>org.osgi.core</artifactId>
-         <version>4.3.0</version>
-      </dependency>
    </dependencies>
 
 </project>
