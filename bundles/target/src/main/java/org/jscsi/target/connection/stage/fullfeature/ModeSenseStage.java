@@ -76,7 +76,7 @@ public final class ModeSenseStage extends TargetFullFeatureStage {
 
             // create ModeParameterList
             final ModeParameterListBuilder builder = new ModeParameterListBuilder(HeaderType.MODE_PARAMETER_HEADER_6);
-            builder.setLogicalBlockDescriptors(new ShortLogicalBlockDescriptor(session.getStorageModule().getSizeInBlocks(),// numberOfLogicalBlocks
+            builder.setLogicalBlockDescriptors(new ShortLogicalBlockDescriptor(session.getStorageModule().getLastBlockIndex(),// numberOfLogicalBlocks
             session.getStorageModule().getBlockSize()));// logicalBlockLength
             builder.setModePages(modePages);
             ModeParameterList modeParameterList = ModeParameterList.build(builder);

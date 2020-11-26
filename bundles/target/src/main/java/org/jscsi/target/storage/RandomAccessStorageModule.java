@@ -94,19 +94,19 @@ public class RandomAccessStorageModule implements IStorageModule {
      * {@inheritDoc}
      */
     @Override
-    public final long getSizeInBlocks() {
-        return sizeInBlocks;
+    public final long getLastBlockIndex() {
+        return sizeInBlocks - 1;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final int checkBounds(final long logicalBlockAddress, final int transferLengthInBlocks) {
+    public final int checkBounds(long logicalBlockAddress, int transferLengthInBlocks) {
     	if (logicalBlockAddress < 0 || logicalBlockAddress >= sizeInBlocks) {
     		return 1;
     	}
-        if (transferLengthInBlocks < 0 || logicalBlockAddress + transferLengthInBlocks - 1 > sizeInBlocks) {
+        if (transferLengthInBlocks < 0 || logicalBlockAddress + transferLengthInBlocks > sizeInBlocks) {
         	return 2;
         }
 

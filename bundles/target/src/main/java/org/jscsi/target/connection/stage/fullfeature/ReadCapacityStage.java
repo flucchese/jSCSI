@@ -76,10 +76,10 @@ public final class ReadCapacityStage extends TargetFullFeatureStage {
             // send PDU with requested READ CAPACITY parameter data
             ReadCapacityParameterData parameterData;
             if (cdb instanceof ReadCapacity10Cdb)
-                parameterData = new ReadCapacity10ParameterData(session.getStorageModule().getSizeInBlocks(),// returnedLogicalBlockAddress
+                parameterData = new ReadCapacity10ParameterData(session.getStorageModule().getLastBlockIndex(),// returnedLogicalBlockAddress
                 session.getStorageModule().getBlockSize());// logicalBlockLengthInBytes
             else
-                parameterData = new ReadCapacity16ParameterData(session.getStorageModule().getSizeInBlocks(),// returnedLogicalBlockAddress
+                parameterData = new ReadCapacity16ParameterData(session.getStorageModule().getLastBlockIndex(),// returnedLogicalBlockAddress
                 session.getStorageModule().getBlockSize());// logicalBlockLengthInBytes
 
             sendResponse(bhs.getInitiatorTaskTag(),// initiatorTaskTag,

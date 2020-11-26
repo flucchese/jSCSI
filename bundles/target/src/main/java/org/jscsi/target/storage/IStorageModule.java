@@ -28,7 +28,7 @@ public interface IStorageModule {
      * so that an appropriate error message can be returned to the initiator. Therefore this method must be called prior
      * to each read or write sequence.
      * <p>
-     * The values returned by this method and their meaning with regard to the interval [0, {@link #getSizeInBlocks()} -
+     * The values returned by this method and their meaning with regard to the interval [0, {@link #getLastBlockIndex()} -
      * 1] are shown in the following table:
      * <p>
      * <table border="1">
@@ -64,7 +64,7 @@ public interface IStorageModule {
      * 
      * @return the virtual amount of storage blocks available
      */
-    long getSizeInBlocks ();
+    long getLastBlockIndex ();
 
     /**
      * Copies bytes from storage to the passed byte array.
